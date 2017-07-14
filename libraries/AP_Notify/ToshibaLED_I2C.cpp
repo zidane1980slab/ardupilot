@@ -41,6 +41,7 @@ ToshibaLED_I2C::ToshibaLED_I2C(uint8_t bus)
 
 bool ToshibaLED_I2C::hw_init(void)
 {
+#ifdef TOSHIBA_LED_I2C_BUS_EXTERNAL
     // first look for led on external bus
     _dev = std::move(hal.i2c_mgr->get_device(_bus, TOSHIBA_LED_I2C_ADDR));
     if (!_dev || !_dev->get_semaphore()->take(HAL_SEMAPHORE_BLOCK_FOREVER)) {
@@ -56,6 +57,7 @@ bool ToshibaLED_I2C::hw_init(void)
         return false;
     }
 
+    if(ret) {
     // update the red, green and blue values to zero
     uint8_t val[4] = { TOSHIBA_LED_PWM0, _led_off, _led_off, _led_off };
     ret = _dev->transfer(val, sizeof(val), nullptr, 0);

@@ -60,3 +60,5 @@ LIBRARIES += AP_Landing
 LIBRARIES += AP_Beacon
 LIBRARIES += PID
 LIBRARIES += AP_Soaring
+LIBRARIES += AP_Param_Helper
+LIBRARIES += AP_WayBack

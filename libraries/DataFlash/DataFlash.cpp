@@ -110,7 +110,7 @@ void DataFlash_Class::Init(const struct LogStructure *structures, uint8_t num_ty
         }
 
         if (backends[_next_backend] == nullptr) {
-            hal.console->printf("Unable to open DataFlash_Revo");
+            printf("Unable to open DataFlash_Revo");
         } else {
             _next_backend++;
         }

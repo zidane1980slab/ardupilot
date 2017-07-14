@@ -73,7 +73,6 @@ void DataFlash_File::Init()
         return;
     }
 
-
     // create the log directory if need be
     const char* custom_dir = hal.util->get_custom_log_directory();
     if (custom_dir != nullptr){
@@ -703,7 +702,6 @@ void DataFlash_File::get_log_info(const uint16_t list_entry, uint32_t &size, uin
     uint16_t log_num = _log_num_from_list_entry(list_entry);
 //    if (log_num == 0) {
     if (! log_exists(log_num)) {
-
         // that failed - probably no logs
         size = 0;
         time_utc = 0;

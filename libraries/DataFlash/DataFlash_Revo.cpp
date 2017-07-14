@@ -406,9 +406,6 @@ void DataFlash_Revo::Init()
     log_write_started = true;
 
     df_PageSize = DF_PAGE_SIZE;
-
-
-
 }
 
 void DataFlash_Revo::WaitReady() { 
@@ -416,7 +413,6 @@ void DataFlash_Revo::WaitReady() {
     
     uint32_t t = AP_HAL::millis();
     while(ReadStatus()!=0){
-    
         Scheduler::yield(0); // пока ждем пусть другие работают
         
         if(AP_HAL::millis() - t > 4000) {
@@ -687,7 +683,6 @@ void DataFlash_Revo::PageErase (uint16_t pageNum)
 
 void DataFlash_Revo::ChipErase()
 {
-
     cmd[0] = JEDEC_BULK_ERASE;
 
     Flash_Jedec_WriteEnable();
