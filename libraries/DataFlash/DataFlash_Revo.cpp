@@ -680,7 +680,6 @@ void DataFlash_Revo::PageErase (uint16_t pageNum)
     cs_release();
 }
 
-
 void DataFlash_Revo::ChipErase()
 {
     cmd[0] = JEDEC_BULK_ERASE;
@@ -835,8 +834,6 @@ void DataFlash_Revo::get_log_boundaries(uint16_t log_num, uint16_t & start_page,
     if (end_page == 0) {
         end_page = start_page;
     }
-    
-
 }
 
 bool DataFlash_Revo::check_wrapped(void)
