@@ -141,11 +141,7 @@ bool DataFlash_File::log_exists(const uint16_t lognum) const
 
 void DataFlash_File::periodic_1Hz(const uint32_t now)
 {
-<<<<<<< HEAD
     if (!(_write_fd) || !_initialised || _open_error || _busy) return; // too early
-=======
-    if (!(_write_fd) || !_initialised || _open_error) return; // too early
->>>>>>> * updated from upstream - Copter 3.5 release
 
     if (!io_thread_alive()) {
         gcs().send_text(MAV_SEVERITY_WARNING, "No IO Thread Heartbeat");
@@ -154,10 +150,7 @@ void DataFlash_File::periodic_1Hz(const uint32_t now)
         // likely to cause a crash.
 //        _write_fd.close();
         _write_fd.sync();
-<<<<<<< HEAD
         printf("\nLoging stopped\n");
-=======
->>>>>>> * updated from upstream - Copter 3.5 release
         _initialised = false;
     }
 }
@@ -998,11 +991,7 @@ void DataFlash_File::_io_timer(void)
     uint32_t tnow = AP_HAL::millis();
     _io_timer_heartbeat = tnow;
 
-<<<<<<< HEAD
     if (!(_write_fd) || !_initialised || _open_error || !has_data) {
-=======
-    if (!(_write_fd) || !_initialised || _open_error) {
->>>>>>> * updated from upstream - Copter 3.5 release
         return;
     }
 
@@ -1124,10 +1113,6 @@ bool DataFlash_File::io_thread_alive() const
     // if the io thread hasn't had a heartbeat in a 5 second then it is dead
     if(_io_timer_heartbeat + 5000 > tnow) return true;
     
-<<<<<<< HEAD
-=======
-    volatile uint32_t xx=tnow; // just for breakpoint
->>>>>>> * updated from upstream - Copter 3.5 release
     return false;
 }
 
