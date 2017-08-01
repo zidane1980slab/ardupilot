@@ -17,6 +17,9 @@ public:
 
     /* AP_Baro public interface: */
     void update();
+    
+    static AP_Baro_Backend *probe(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> dev);
+    
 
     static AP_Baro_Backend *probe(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> dev);
 
@@ -35,7 +38,6 @@ private:
 
     uint16_t _read_prom_word(uint8_t word);
     bool     _read_prom(uint16_t *prom);
-
 
     AP_HAL::OwnPtr<AP_HAL::Device> _dev;
     AP_HAL::DigitalSource *_eoc;
