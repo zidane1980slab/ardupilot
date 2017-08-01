@@ -571,7 +571,7 @@ private:
 
     static bool parse_param_line(char *line, char **vname, float &value);
     
-#if HAL_OS_POSIX_IO == 1
+#if HAL_OS_POSIX_IO == 1 || defined(BOARD_HAS_SDIO)
     /*
       load a parameter defaults file. This happens as part of load_all()
      */
