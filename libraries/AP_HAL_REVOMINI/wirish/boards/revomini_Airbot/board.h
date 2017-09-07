@@ -151,7 +151,7 @@ void boardInit(void);
 
 
 // use soft I2C driver instead hardware
-//#define BOARD_SOFT_I2C
+#define BOARD_SOFT_I2C2
 
 #define USE_SERIAL_4WAY_BLHELI_INTERFACE
 
@@ -179,8 +179,8 @@ void boardInit(void);
 
 */
    //                                    name            device   bus  mode         cs_pin                       speed_low       speed_high soft   dma
-#define BOARD_SPI_DEVICES    { BOARD_INS_MPU60x0_NAME,   _SPI1,   1,  SPI_MODE_3, BOARD_MPU6000_CS_PIN,          SPI_1_125MHZ,   SPI_9MHZ,  true,  0 }, \
-                             { BOARD_DATAFLASH_NAME,     _SPI3,   3,  SPI_MODE_3, 254 /* device controls CS */ , SPI_1_125MHZ,   SPI_18MHZ, false, 1  },
+#define BOARD_SPI_DEVICES    { BOARD_INS_MPU60x0_NAME,   _SPI1,   1,  SPI_MODE_3, BOARD_MPU6000_CS_PIN,          SPI_1_125MHZ,   SPI_9MHZ,  true,   0 }, \
+                             { BOARD_DATAFLASH_NAME,     _SPI3,   3,  SPI_MODE_3, 254 /* device controls CS */ , SPI_1_125MHZ,   SPI_18MHZ, false,  1  },
 
 
 /*
