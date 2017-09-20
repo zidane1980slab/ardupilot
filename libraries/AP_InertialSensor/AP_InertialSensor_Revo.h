@@ -146,7 +146,6 @@ private:
     // buffer for fifo read
     uint8_t *_fifo_buffer; 
 
-
     /*
       accumulators for fast sampling
       See description in _accumulate_fast_sampling()
