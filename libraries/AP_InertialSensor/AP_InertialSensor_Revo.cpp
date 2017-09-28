@@ -340,7 +340,6 @@ void AP_InertialSensor_Revo::_ioc(){ // io completion ISR, data already in its p
     } else {
         write_ptr=new_wp; // move forward
     }
-<<<<<<< HEAD
 
     //_dev->register_completion_callback(NULL); 
 // we should release the bus semaphore if we use them 
@@ -353,15 +352,12 @@ void AP_InertialSensor_Revo::_ioc(){ // io completion ISR, data already in its p
         REVOMINIScheduler::context_switch_isr(); // and reschedule tasks after interrupt
 */ 
         Scheduler::task_resume(task_handle); // resume task instead of using period. 
-=======
-    if(write_ptr == read_ptr) { // buffer overflow
-//        debug("MPU buffer overflow!");    
-        REVOMINIScheduler::MPU_buffer_overflow(); // count them
->>>>>>> * working version with new drivers
     }
 
+    REVOMINIScheduler::set_task_forced(task_handle);
+
+    _dev->register_completion_callback(NULL); // inform that IOC finished
 // we should release the bus semaphore if we use them 
-//    _dev->register_completion_callback(NULL); // allow to bus driver to release bus semaphore
 //    _dev->get_semaphore()->give();            // release
 }
 
@@ -370,7 +366,7 @@ void AP_InertialSensor_Revo::_ioc(){ // io completion ISR, data already in its p
  */
 void AP_InertialSensor_Revo::_poll_data()
 {
-    _read_fifo();
+    _read_fifo(0);
 }
 
 bool AP_InertialSensor_Revo::_accumulate(uint8_t *samples, uint8_t n_samples)
@@ -523,9 +519,8 @@ bool AP_InertialSensor_Revo::_accumulate_fast_sampling(uint8_t *samples, uint8_t
 
 #define MAX_NODATA_TIME 5000 // 5ms
 
-void AP_InertialSensor_Revo::_read_fifo()
+void AP_InertialSensor_Revo::_read_fifo(uint8_t count)
 {
-<<<<<<< HEAD
     uint32_t now=Scheduler::_micros();
 
 #ifdef MPU_DEBUG_LOG
@@ -561,53 +556,25 @@ void AP_InertialSensor_Revo::_read_fifo()
     
     while(read_ptr != write_ptr) { // there are samples
 //        uint64_t time = _fifo_buffer[read_ptr++].time; // we can get exact time
-=======
-
-    if(read_ptr == write_ptr) nodata_count++; 
-    if(nodata_count > MAX_NODATA_COUNT) { // something went wrong - data stream stopped
-        _start(); // try to restart MPU        
-        nodata_count=0;
-    }
-
-    while(read_ptr != write_ptr) { // there are samples
-//        uint64_t time = _fifo_buffer[read_ptr++].time; // we can get exact time
-//        uint8_t *rx = (uint8_t *)(&_fifo_buffer[read_ptr++].ax);  // calculate address and move to next item
->>>>>>> * working version with new drivers
         uint8_t *rx = _fifo_buffer + MPU_SAMPLE_SIZE * read_ptr++;  // calculate address and move to next item
         if(read_ptr >= MPU_FIFO_BUFFER_LEN) { // move write pointer
             read_ptr=0;                       // ring
         }
-<<<<<<< HEAD
-=======
-
->>>>>>> * working version with new drivers
 
 
         if (_fast_sampling) {
             if (!_accumulate_fast_sampling(rx, 1)) {
 //                debug("stop at %u of %u", n_samples, bytes_read/MPU_SAMPLE_SIZE);
                 // break;  don't break before all items in queue will be readed
-<<<<<<< HEAD
-=======
-                nodata_count++; // but calculate this cases. If we get some errors sequentally then MPU will be restarted
->>>>>>> * working version with new drivers
                 continue;
             }
         } else {
             if (!_accumulate(rx, 1)) {
                 // break; don't break before all items in queue will be readed
-<<<<<<< HEAD
                 continue;
             }
         }
         count++;
-=======
-                nodata_count++;
-                continue;
-            }
-        }
-        nodata_count=0;
->>>>>>> * working version with new drivers
     }
     now = Scheduler::_micros();
     last_sample=now;
