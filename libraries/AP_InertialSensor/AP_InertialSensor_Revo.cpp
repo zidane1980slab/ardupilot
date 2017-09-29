@@ -327,10 +327,17 @@ void AP_InertialSensor_Revo::_isr(){
     _block_read(MPUREG_ACCEL_XOUT_H, data, MPU_SAMPLE_SIZE); // start SPI transfer 
 }
 
+<<<<<<< HEAD
 void AP_InertialSensor_Revo::_ioc(){ // io completion ISR, data already in its place
     uint16_t new_wp = write_ptr+1;
     if(new_wp >= MPU_FIFO_BUFFER_LEN) { // move write pointer
         new_wp=0;                         // ring
+=======
+void AP_InertialSensor_Revo::_ioc(){ // io completion ISR, data in it place
+    uint16_t old_wp = write_ptr;
+    if(write_ptr++ >= MPU_FIFO_BUFFER_LEN) { // move write pointer
+        write_ptr=0;                         // ring
+>>>>>>> * added parameter to allow deferring of EEPROM write up to disarm
     }
     if(new_wp == read_ptr) { // buffer overflow
 #ifdef MPU_DEBUG
@@ -354,19 +361,24 @@ void AP_InertialSensor_Revo::_ioc(){ // io completion ISR, data already in its p
         Scheduler::task_resume(task_handle); // resume task instead of using period. 
     }
 
-    REVOMINIScheduler::set_task_forced(task_handle);
-
     _dev->register_completion_callback(NULL); // inform that IOC finished
 // we should release the bus semaphore if we use them 
 //    _dev->get_semaphore()->give();            // release
+
+// schedule data parsing to next timer's tick
+    REVOMINIScheduler::do_at_next_tick(REVOMINIScheduler::get_handler(FUNCTOR_BIND_MEMBER(&AP_InertialSensor_Revo::_poll_data, void)), (REVOMINI::Semaphore *)_sem);    
 }
 
 /*
+<<<<<<< HEAD
  * Timer process to poll for new data from the Invensense. Called from timer's interrupt or from personal thread
+=======
+ * Timer process to poll for new data from the Invensense. Called from timer's interrupt
+>>>>>>> * added parameter to allow deferring of EEPROM write up to disarm
  */
 void AP_InertialSensor_Revo::_poll_data()
 {
-    _read_fifo(0);
+    _read_fifo();
 }
 
 bool AP_InertialSensor_Revo::_accumulate(uint8_t *samples, uint8_t n_samples)
@@ -382,18 +394,29 @@ bool AP_InertialSensor_Revo::_accumulate(uint8_t *samples, uint8_t n_samples)
                          int16_val(data, 0),
                          -int16_val(data, 2)) * _accel_scale;
 
+<<<<<<< HEAD
         int16_t t2 = int16_val(data, 3);
+=======
+>>>>>>> * added parameter to allow deferring of EEPROM write up to disarm
 /*
         if (!_check_raw_temp(t2)) {
             debug("temp reset %d %d i=%d", _raw_temp, t2, i);
             return false; // just skip this sample
         }
 */        
+<<<<<<< HEAD
+=======
+        int16_t t2 = int16_val(data, 3);
+>>>>>>> * added parameter to allow deferring of EEPROM write up to disarm
         float temp = t2 * temp_sensitivity + temp_zero;
         
         gyro = Vector3f(int16_val(data, 5),
                         int16_val(data, 4),
+<<<<<<< HEAD
                         -int16_val(data, 6)) * GYRO_SCALE;
+=======
+                        -int16_val(data, 6)) * GYRO_SCALE;;
+>>>>>>> * added parameter to allow deferring of EEPROM write up to disarm
 
         _rotate_and_correct_accel(_accel_instance, accel);
         _rotate_and_correct_gyro(_gyro_instance, gyro);
@@ -455,7 +478,11 @@ bool AP_InertialSensor_Revo::_accumulate_fast_sampling(uint8_t *samples, uint8_t
 
         // use temperatue to detect FIFO corruption
         int16_t t2 = int16_val(data, 3);
+<<<<<<< HEAD
 /* MPU don't likes such reads
+=======
+/*
+>>>>>>> * added parameter to allow deferring of EEPROM write up to disarm
         if (!_check_raw_temp(t2)) {
             debug("temp reset %d %d", _raw_temp, t2);
 //            _fifo_reset();
@@ -519,8 +546,9 @@ bool AP_InertialSensor_Revo::_accumulate_fast_sampling(uint8_t *samples, uint8_t
 
 #define MAX_NODATA_TIME 5000 // 5ms
 
-void AP_InertialSensor_Revo::_read_fifo(uint8_t count)
+void AP_InertialSensor_Revo::_read_fifo()
 {
+<<<<<<< HEAD
     uint32_t now=Scheduler::_micros();
 
 #ifdef MPU_DEBUG_LOG
@@ -554,7 +582,23 @@ void AP_InertialSensor_Revo::_read_fifo(uint8_t count)
     uint32_t t     = now;
 #endif
     
+=======
+    uint32_t now=REVOMINIScheduler::_millis();
+    if(read_ptr == write_ptr) {
+        if(now - last_sample > MAX_NODATA_COUNT) { // something went wrong - data stream stopped
+            _start(); // try to restart MPU        
+            last_sample=now;
+            REVOMINIScheduler::MPU_restarted(); // count them
+        }
+    }
+
+
+    uint32_t t=REVOMINIScheduler::_micros();
+    uint16_t count=0;
+
+>>>>>>> * added parameter to allow deferring of EEPROM write up to disarm
     while(read_ptr != write_ptr) { // there are samples
+        last_sample=now;
 //        uint64_t time = _fifo_buffer[read_ptr++].time; // we can get exact time
         uint8_t *rx = _fifo_buffer + MPU_SAMPLE_SIZE * read_ptr++;  // calculate address and move to next item
         if(read_ptr >= MPU_FIFO_BUFFER_LEN) { // move write pointer
@@ -575,6 +619,7 @@ void AP_InertialSensor_Revo::_read_fifo(uint8_t count)
             }
         }
         count++;
+<<<<<<< HEAD
     }
     now = Scheduler::_micros();
     last_sample=now;
@@ -592,6 +637,14 @@ void AP_InertialSensor_Revo::_read_fifo(uint8_t count)
 // only wait_for_sample() uses delay_microseconds_boost() so 
 // resume main thread then it waits for this sample - sample already got
     Scheduler::resume_boost(); 
+=======
+        uint32_t dt=REVOMINIScheduler::_micros() - t ;
+        if(dt > 500) break; // next time
+        if(count>100) break;
+    }
+
+        
+>>>>>>> * added parameter to allow deferring of EEPROM write up to disarm
 }
 
 /*
