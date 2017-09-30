@@ -556,7 +556,6 @@ void AP_InertialSensor_Revo::_read_fifo()
 #endif
     
     while(read_ptr != write_ptr) { // there are samples
-        last_sample=now;
 //        uint64_t time = _fifo_buffer[read_ptr++].time; // we can get exact time
         uint8_t *rx = _fifo_buffer + MPU_SAMPLE_SIZE * read_ptr++;  // calculate address and move to next item
         if(read_ptr >= MPU_FIFO_BUFFER_LEN) { // move write pointer
