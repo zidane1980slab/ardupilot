@@ -29,13 +29,48 @@
 
 #define SHED_FREQ 10000 // in Hz
 
-
-
-#define MAIN_STACK_SIZE  8192U    // measured use of stack is only 1K - but it grows up to 4K when using FatFs
+#define MAIN_STACK_SIZE  10240U   // measured use of stack is only 1K - but it grows up to 4K when using FatFs, also this includes 2K stack for ISR
 #define DEFAULT_STACK_SIZE  8192U // Default tasks stack size and stack max - io_thread can do work with filesystem
-#define SLOW_TASK_STACK 2048U     // small stack for sensors
+#define SLOW_TASK_STACK 1024U // 2048U     // small stack for sensors
 #define STACK_MAX  65536U
 
+
+struct task_t {
+#ifdef PREEMPTIVE
+        const uint8_t* sp;      //!< Task stack pointer, should be first to access from context switcher
+#else
+        jmp_buf context;        //!< Task context
+#endif
+        task_t* next;           //!< Next task
+        task_t* prev;           //!< Previous task
+        Handler handle;         //!< loop() in Revo_handler - to allow to change task, call via revo_call_handler
+        const uint8_t* stack;   //!< Task stack, should be first to access from context switcher
+        uint8_t id;             // id of task
+        uint8_t priority;       // priority of task
+        uint8_t curr_prio;      // current priority of task, usually higher than priority
+        bool active;            // task not ended
+        bool in_ioc;            // task starts IO_Completion so don't release bus semaphore
+        uint8_t has_semaphore;  // count how many times task has a semaphore so let it run until gives it
+        uint32_t ttw;           // time to work
+        uint32_t t_yield;       // time of yield
+        uint32_t start;         // microseconds of timeslice start
+        uint32_t max_delay;     // maximal execution time of task - used in scheduler
+        uint32_t in_isr;        // time in ISR when task runs
+        uint32_t period;        // if set then task starts on time basis only
+        REVOMINI::Semaphore *sem; // task should start after owning this semaphore
+        REVOMINI::Semaphore *sem_wait; // task is waiting this semaphore
+        uint32_t def_ttw;       // default TTW - not as hard as period
+        uint32_t time_start;    // start time of task
+#ifdef MTASK_PROF
+        uint64_t time;  // full time
+        uint32_t max_time; //  maximal execution time of task - to show
+        uint32_t maxt_addr; // address of end of max-time code
+        uint32_t count;     // call count to calc mean
+        uint32_t sched_error; // delay on task start
+        uint32_t sem_count;   // how many times task was not switched because has semaphore
+#endif
+        uint32_t guard; // stack guard
+};
 
 extern "C" {
     extern unsigned _estack; // defined by link script
@@ -49,6 +84,13 @@ extern "C" {
 
     extern voidFuncPtr boardEmergencyHandler; // will be called on any fault or panic() before halt
     void PendSV_Handler();
+    void SVC_Handler();
+    void getNextTask();
+    
+    void switchContext();
+    void __do_context_switch();
+
+    extern task_t* s_running;
 
     extern caddr_t stack_bottom; // for SBRK check
     
@@ -108,11 +150,13 @@ typedef struct RevoTick {
 typedef struct RevoSchedLog {
     uint32_t start;
     uint32_t end;
-    uint32_t sleep;
     uint32_t loop_count;
-    uint32_t ttw_skip_count;
+//    uint32_t ttw_skip_count;
     uint32_t ttw;
+    uint32_t time_start;    
     uint8_t task_id;
+    uint8_t prio;
+    uint8_t active;
 } revo_sched_log;
 
 #define SHED_DEBUG_SIZE 512
@@ -130,39 +174,9 @@ typedef struct REVO_IO {
 
 class REVOMINI::REVOMINIScheduler : public AP_HAL::Scheduler {
 public:
-
   /**
    * Task run-time structure.
    */
-    struct task_t {
-        task_t* next;           //!< Next task
-        task_t* prev;           //!< Previous task
-        Handler handle;         //!< loop() in Revo_handler - to allow to change task, call via revo_call_handler
-        jmp_buf context;        //!< Task context
-        const uint8_t* stack;   //!< Task stack
-        uint8_t id;             // id of task
-        uint8_t priority;       // priority of task
-        bool active;            // task not ended
-        bool in_ioc;            // task starts IO_Completion so don't release bus semaphore
-        uint8_t has_semaphore;  // count how many times task has a semaphore so let it run until gives it
-        uint32_t ttw;           // time to work
-        uint32_t t_yield;       // time of yield
-        uint32_t start;         // microseconds of timeslice start
-        uint32_t max_delay;     // maximal execution time of task - used in scheduler
-        uint32_t in_isr;        // time in ISR when task runs
-        uint32_t period;        // if set then task starts on time basis only
-        REVOMINI::Semaphore *sem;
-        uint32_t def_ttw;       // default TTW - not as hard as period
-        uint32_t time_start;    // start time of task
-#ifdef MTASK_PROF
-        uint64_t time;  // full time
-        uint32_t max_time; //  maximal execution time of task - to show
-        uint32_t maxt_addr; // address of end of max-time code
-        uint32_t count;     // call count to calc mean
-        uint32_t sched_error; // delay on task start
-#endif
-        uint32_t guard; // stack guard
-    };
 
     typedef struct IO_COMPLETION {
         Handler handler;
@@ -292,6 +306,7 @@ public:
   static void set_task_period(void *h, uint32_t period);
   static void set_task_semaphore(void *h, REVOMINI::Semaphore *sem);
   static void set_task_ttw(void *h, uint32_t ttw);
+  static void set_task_priority(void *h, uint8_t prio);
   
   static void stop_task(void * h);
   static task_t* get_empty_task();
@@ -300,11 +315,21 @@ public:
   static inline void set_task_ioc(bool v) { s_running->in_ioc=v; }
   static inline void task_has_semaphore(bool v) { 
     noInterrupts();
-    if(v) s_running->has_semaphore++; 
-    else  if(s_running->has_semaphore) s_running->has_semaphore--; 
+    if(v) {
+        s_running->has_semaphore++; 
+    } else  if(s_running->has_semaphore) {
+        s_running->has_semaphore--; 
+    }
     interrupts();
   }
 
+  static inline void task_want_semaphore(void * _task, REVOMINI::Semaphore *sem) { //Increase the priority of the semaphore's owner up to the priority of the current task
+    task_t * task = (task_t*)_task;
+    if(task->priority < s_running->priority) task->curr_prio = s_running->priority;
+    s_running->sem_wait = sem;
+  }
+
+  static void get_next_task();
   /**               
    * Context switch to next task in run queue.
    */
@@ -324,7 +349,6 @@ public:
         Revo_handler h = { .mp=proc };
         REVOMINIGPIO::_attach_interrupt(BOARD_MPU6000_DRDY_PIN, h.h, RISING, 11);
     }
-    static inline void enable_IMU_interrupt(bool e) {   REVOMINIGPIO::enable_interrupt(BOARD_MPU6000_DRDY_PIN, e); }
 
 //{ IO completion routines
 
@@ -349,13 +373,17 @@ public:
     }
 
     static inline void do_io_completion(uint8_t id){ // schedule selected IO completion
-        io_completion[id-1].request = true;
-
+        if(id) io_completion[id-1].request = true;
+        need_io_completion=true;
         SCB->ICSR = SCB_ICSR_PENDSVSET_Msk; // PENDSVSET
     }
 
     static void PendSV_Handler();
+    static volatile bool need_io_completion;
 
+#ifdef PREEMPTIVE
+    static volatile bool need_switch_task; // should be public
+#endif
 //}
 
 
@@ -386,6 +414,7 @@ public:
 
 protected:
 
+    static void do_task(task_t * task);
 /**
    * Initiate a task with the given functions and stack. When control
    * is yield to the task the setup function is first called and then
@@ -397,9 +426,6 @@ protected:
 
     static uint32_t fill_task(task_t &tp);
 
-    /** Running task. */
-    static task_t* s_running;
-  
     /** Task stack allocation top. */
     static size_t s_top;
   
