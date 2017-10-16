@@ -45,7 +45,6 @@
 #if HAL_WITH_UAVCAN
 #include "AP_Baro_UAVCAN.h"
 #endif
-#include "AP_Baro_Revo.h"
 
 #define INTERNAL_TEMPERATURE_CLAMP 35.0f
 
