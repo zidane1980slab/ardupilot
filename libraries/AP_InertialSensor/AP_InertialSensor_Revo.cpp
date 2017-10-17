@@ -523,12 +523,8 @@ bool AP_InertialSensor_Revo::_accumulate_fast_sampling(uint8_t *samples, uint8_t
     return ret;
 }
 
-<<<<<<< HEAD
 
 #define MAX_NODATA_TIME 5000 // 5ms
-=======
-#define MAX_NODATA_TIME 20000 // 20ms
->>>>>>> * added parameter RC_FS to enable all HAL generated RC input failsafe
 
 void AP_InertialSensor_Revo::_read_fifo()
 {
@@ -559,17 +555,11 @@ void AP_InertialSensor_Revo::_read_fifo()
 
     last_sample=now;
 
-<<<<<<< HEAD
     uint16_t count = 0;
 #ifdef MPU_DEBUG
     uint32_t dt    = 0;
     uint32_t t     = now;
 #endif
-=======
-    uint32_t t     = REVOMINIScheduler::_micros();
-    uint16_t count = 0;
-    uint32_t dt    = 0;
->>>>>>> * added parameter RC_FS to enable all HAL generated RC input failsafe
     
     while(read_ptr != write_ptr) { // there are samples
 //        uint64_t time = _fifo_buffer[read_ptr++].time; // we can get exact time
@@ -592,28 +582,8 @@ void AP_InertialSensor_Revo::_read_fifo()
             }
         }
         count++;
-<<<<<<< HEAD
     }
     now = Scheduler::_micros();
-=======
-#ifndef PREEMPTIVE
-        if(count>=4) { // not more than 4 points at a time, all another next time
-            REVOMINIScheduler::do_at_next_tick(REVOMINIScheduler::get_handler(FUNCTOR_BIND_MEMBER(&AP_InertialSensor_Revo::_poll_data, void)), (REVOMINI::Semaphore *)_sem);    
-            break;
-        }
-#endif
-    }
-    now = REVOMINIScheduler::_micros();
-    dt= now - t;// time from entry
-
->>>>>>> * added parameter RC_FS to enable all HAL generated RC input failsafe
-    last_sample=now;
-
-#ifdef MPU_DEBUG_LOG
-    if(count==1) {
-        mpu_log_ptr = old_log_ptr;
-    }
-#endif
 #ifdef MPU_DEBUG
     dt= now - t;// time from entry
     REVOMINIScheduler::MPU_stats(count,dt);
