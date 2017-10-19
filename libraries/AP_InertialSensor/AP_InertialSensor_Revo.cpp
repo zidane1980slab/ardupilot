@@ -359,13 +359,11 @@ void AP_InertialSensor_Revo::_ioc(){ // io completion ISR, data already in its p
 //    _dev->get_semaphore()->give();            // release
 
 
-#ifdef PREEMPTIVE
-    REVOMINIScheduler::set_task_active(task_handle); // resume task instead of using period. 
-#else
-// schedule data parsing to next timer's tick
-    REVOMINIScheduler::do_at_next_tick(REVOMINIScheduler::get_handler(FUNCTOR_BIND_MEMBER(&AP_InertialSensor_Revo::_poll_data, void)), (REVOMINI::Semaphore *)_sem);    
-#endif    
+    if(REVOMINIScheduler::get_current_task() != (void *)task_handle) {
+        REVOMINIScheduler::set_task_active(task_handle); // resume task instead of using period. 
 
+        REVOMINIScheduler::context_switch_isr(); // and reschedule tasks after interrupt
+    }
 }
 
 /*

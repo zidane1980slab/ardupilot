@@ -167,7 +167,6 @@ private:
     
     Vector3f gyro_mean;
 
-
 //#define MPU_DEBUG_LOG
 
 #ifdef MPU_DEBUG_LOG
