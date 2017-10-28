@@ -245,6 +245,15 @@ uint8_t SDClass::stat(const char *filepath, FILINFO* fno){
     return 0;
 }
 
+uint8_t SDClass::format(const char *filepath){
+    _card.ioctl(CTRL_FORMAT,0); // clear chip
+    
+    lastError = _fatFs.format(filepath, &_card);
+    
+    
+    return lastError == FR_OK;
+}
+
 
 
 //* *************************************
