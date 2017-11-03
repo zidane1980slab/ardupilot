@@ -87,6 +87,7 @@ void DataFlash_Class::Init(const struct LogStructure *structures, uint8_t num_ty
         DFMessageWriter_DFLogStart *message_writer =
             new DFMessageWriter_DFLogStart(_firmware_string);
         if (message_writer != nullptr)  {
+#if HAL_OS_POSIX_IO
             backends[_next_backend] = new DataFlash_File(*this,
                                                          message_writer,
                                                          HAL_BOARD_LOG_DIRECTORY);
