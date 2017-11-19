@@ -354,7 +354,8 @@ void AP_InertialSensor_Revo::_ioc(){ // io completion ISR, data already in its p
         Scheduler::task_resume(task_handle); // resume task instead of using period. 
     }
 
-    _dev->register_completion_callback(NULL); // inform that IOC finished
+    //_dev->register_completion_callback(NULL); 
+    _dev->clear_completion_callback_isr();  // inform that IOC finished
 // we should release the bus semaphore if we use them 
 //    _dev->get_semaphore()->give();            // release
 
