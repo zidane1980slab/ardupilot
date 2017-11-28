@@ -1,5 +1,13 @@
 #pragma GCC optimize ("O2")
 
+
+/*
+    SD card and Dataflash low-level driver
+    
+    night_ghost@ykoctpa.ru 2017
+
+*/
+
 #include "sd.h"
 #include "../diskio.h"
 #include "../ff.h"
@@ -76,7 +84,7 @@ extern int printf(const char *msg, ...);
 
 #if defined(BOARD_SDCARD_CS_PIN)
 
-//#define WAIT_IN_ISR
+//#define WAIT_IN_ISR - works bad
 
 static BYTE CardType;			/* Card type flags */
 static BYTE was_write=0;
@@ -848,7 +856,7 @@ static uint32_t erase_size = BOARD_DATAFLASH_ERASE_SIZE;
    static uint8_t erase_cmd=JEDEC_SECTOR_ERASE;
  #endif
 
-static uint8_t cmd[4];
+static uint8_t cmd[4]; // for DMA transfer
 
 
 static bool chip_is_clear=false;

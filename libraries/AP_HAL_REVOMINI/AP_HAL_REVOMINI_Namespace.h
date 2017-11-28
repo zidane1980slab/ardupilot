@@ -32,7 +32,6 @@ namespace REVOMINI {
     class SBUS_parser;
     class NRF_parser;
     class SerialDriver;
-//#if defined(BOARD_OSD_CS_PIN)
     class UART_OSD;
     class UART_PPM;
     class MassStorage;

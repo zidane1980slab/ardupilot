@@ -1,4 +1,17 @@
 /*
+    night_ghost@ykoctpa.ru 2017
+    
+    a port of SparkFun's SD class to FatFs (c) Chan
+     because it much better and faster than sdfatlib
+    
+    also it was rewritten to:
+* distinguish between flie at directory by stat(), not by try to open
+* provide last error code and its text description
+* added tracking of opened files for global sync()
+* some new functions added
+    
+  original SparkFun readme below
+----------------------------------------------
 
  SD - a slightly more friendly wrapper for sdfatlib
 
@@ -33,22 +46,6 @@
 
  */
 
-/*
-
-  Implementation Notes
-
-  In order to handle multi-directory path traversal, functionality that
-  requires this ability is implemented as callback functions.
-
-  Individual methods call the `walkPath` function which performs the actual
-  directory traversal (swapping between two different directory/file handles
-  along the way) and at each level calls the supplied callback function.
-
-  Some types of functionality will take an action at each level (e.g. exists
-  or make directory) which others will only take an action at the bottom
-  level (e.g. open).
-
- */
 
 extern "C" {
   #include <stdlib.h>
@@ -94,7 +91,6 @@ uint8_t SDClass::exists(const char *filepath)
     FILINFO fno;
 
     lastError=f_stat(filepath, &fno);
-//    fno->fattrib & AM_DIR
 
                                 // FatFs gives such error for root directory
     return lastError == FR_OK || lastError == FR_INVALID_NAME;
@@ -268,7 +264,8 @@ File::File(const char* fname)
 {
     _name = (char*)malloc(strlen(fname) +1);
     assert(_name  != NULL );
-    sprintf(_name, "%s", fname);
+    //sprintf(_name, "%s", fname);
+    strcpy(_name, fname);
     _fil.fs = 0;
     _dir.fs = 0;
 }
@@ -413,9 +410,6 @@ void File::printNumber(int16_t n, cb_putc cb) {
 
     *str = '\0';
     
-    // prevent crash if called with base == 1
-//    if (base < 2) base = 10;
-  
     do {
         char c = n % base;
         n /= base;
@@ -470,9 +464,9 @@ UINT File::gets(char* buf, size_t len)
         if(c=='\n') break;
         if(c=='\r') continue;
         *buf++=c;
+        *buf=0;   // close string
         bytesread++;
     }        
-    if(len) *buf++=0; // close string
     return bytesread;
 
 }

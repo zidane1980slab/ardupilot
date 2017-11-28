@@ -9,6 +9,7 @@
 #include <usart.h>
 #include "RC_parser.h"
 #include "Config.h"
+#include "c++.h"
 
 
 #define BOARD_RC_FAILSAFE 2 // flag that failsafe is enabled
@@ -29,6 +30,7 @@ enum BOARD_RC_MODE {
     BOARD_RC_SBUS_NI = 8,
 };
 
+#define MAX_RC_PARSERS 6
 
 
 class REVOMINI::REVOMINIRCInput : public AP_HAL::RCInput {
@@ -52,7 +54,7 @@ public:
     static uint16_t max_num_pulses; // for statistics
         
 private:
-    static _parser *parsers[];
+    static _parser * parsers[MAX_RC_PARSERS];
     static uint8_t num_parsers;
     static uint8_t _last_read_from;
     

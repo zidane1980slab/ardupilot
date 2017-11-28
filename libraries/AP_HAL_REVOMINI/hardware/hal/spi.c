@@ -7,9 +7,9 @@
  * SPI devices
  */
 
-static spi_state spi1_state;
-static spi_state spi2_state;
-static spi_state spi3_state;
+static spi_state spi1_state IN_CCM;
+static spi_state spi2_state IN_CCM;
+static spi_state spi3_state IN_CCM;
 
 static const spi_dev spi1 = {
     .SPIx     = SPI1,
@@ -196,24 +196,6 @@ int spimaster_transfer(const spi_dev *dev,
                        uint8_t *rxbuf,
                        uint16_t rxcount)
 {
-#if 0
-	// Validate parameters
-	if ((txbuf == NULL) && (txcount != 0)){
-		return __LINE__ - 3;
-	}
-
-	if ((txcount == 0) && (txbuf != NULL)){
-		return __LINE__ - 3;
-	}
-
-	if ((rxbuf == NULL) && (rxcount != 0)){
-		return __LINE__ - 3;
-	}
-
-	if ((rxcount == 0) && (rxbuf != NULL)){
-		return __LINE__ - 3;
-	}
-#endif
 
     uint16_t tmp;
 
@@ -257,16 +239,6 @@ int spimaster_transfer(const spi_dev *dev,
 	return tmp;
 }
 
-
-/*
-uint32_t spi_tx(const spi_dev *dev, const void *buf, uint16_t len) {
-    uint16_t txed = 0;
-    while ( (txed < len) && spi_is_tx_empty(dev) ) {
-            dev->SPIx->DR = ((const uint8_t*)buf)[txed++];
-    }
-    return txed;
-}
-*/
 
 static void isr_handler(const spi_dev *dev){
     NVIC_ClearPendingIRQ(dev->irq);
