@@ -25,13 +25,13 @@
 
 #define MAIN_PRIORITY  100  // priority for main task
 #define DRIVER_PRIORITY 98  // priority for drivers, speed of main will be 1/4 of this
-#define IO_PRIORITY    107  // main task has 100 so IO tasks will use 1/8 of CPU
+#define IO_PRIORITY    115  // main task has 100 so IO tasks will use 1/16 of CPU
 
 #define SHED_FREQ 10000   // timer's freq in Hz
 #define TIMER_PERIOD 100  // task timeslice period in uS
 
 
-#define MAIN_STACK_SIZE     7168U   // measured use of stack is only 1.5K - but it grows up to 5K when using FatFs, also this includes 1K stack for ISR
+#define MAIN_STACK_SIZE     6144U   // measured use of stack is only 1.5K - but it grows up to 5K when using FatFs, also this includes 1K stack for ISR
 #define IO_STACK_SIZE       4096U   // IO_tasks stack size - io_thread can do work with filesystem
 #define DEFAULT_STACK_SIZE  1024U   // Default tasks stack size 
 #define SMALL_TASK_STACK    1024U   // small stack for sensors
@@ -59,7 +59,7 @@ struct task_t {
         uint8_t priority;       // priority of task
         uint8_t curr_prio;      // current priority of task, usually higher than priority
         bool active;            // task not ended
-        bool f_yield;           // task gives its quant
+        bool f_yield;           // task gives its quant voluntary
         uint32_t ttw;           // time to wait
         uint32_t t_yield;       // time of yield
         uint32_t period;        // if set then task starts on time basis only
@@ -116,7 +116,6 @@ extern "C" {
     void hal_yield(uint16_t ttw);
     void hal_delay(uint16_t t);
     void hal_delay_microseconds(uint16_t t);
-    void hal_delay_us_ny(uint16_t t);
     uint32_t hal_micros();
     void hal_isr_time(uint32_t t);
     
@@ -316,10 +315,13 @@ public:
         s_running->count_paused++;
     }                    
     static void inline task_resume(void *h) {   // called from IO_Complete ISR to resume task
+#if defined(USE_MPU)
+        mpu_disable();      // we need access to write
+#endif
         task_t * task = (task_t*)h; 
         task->ttw=0;  
         task->active=true;
-        _forced_task = task; // force it. Tus we exclude loop to select task
+        _forced_task = task; // force it. Thus we exclude loop to select task
         context_switch_isr();
         uint32_t dt= _micros() - task->sem_start_wait;
         task->t_paused += dt;
@@ -327,7 +329,12 @@ public:
 #else
     static void inline task_pause(uint16_t t) {   s_running->ttw=t;  }  // called from task when it starts IO transfer
     static void inline task_resume(void *h)   {    // called from IO_Complete ISR to resume task, and will get 1st quant 100%
+#if defined(USE_MPU)
+        mpu_disable();      // we need access to write
+#endif
         task_t * task = (task_t*)h; 
+        task->ttw=0;  
+        task->active=true;
         _forced_task = task; // force it
         context_switch_isr();
   } 
@@ -352,6 +359,30 @@ public:
   
     // check from what task it called
     static inline bool _in_main_thread() { return s_running == &s_main; }
+
+    // resume task that called delay_boost()
+    static void resume_boost(){
+        if(boost_task) {
+            task_t *task = (task_t *) boost_task;
+            boost_task=NULL;
+            
+            
+            if(task->ttw){// task wants to wait 
+#if defined(USE_MPU)
+                mpu_disable();      // we need access to write
+#endif
+                uint32_t now =  _micros();
+                uint32_t timeFromLast = now - task->t_yield;     // time since that moment
+                if(task->ttw<=100 || timeFromLast > task->ttw*3/2){       // gone 2/3 of time?
+                    task->ttw=0;        // stop waiting  
+                    task->active=true;
+                    _forced_task = task; // force it
+                }
+            } else {
+                _forced_task = task; // just force it
+            }
+        }
+    }
 
     static inline void plan_context_switch(){
         need_switch_task = true; // require context switch
@@ -562,6 +593,8 @@ private:
 #endif
     
     static Handler on_disarm_handler;
+    
+    static void *boost_task;
 };
 
 void revo_call_handler(Handler h, uint32_t arg);
