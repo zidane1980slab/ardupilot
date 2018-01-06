@@ -92,6 +92,11 @@ bool AP_Baro_BMP085::_init()
     bool prom_ok=false;
     _type=0;
 
+    _dev->read_registers(0xD1, &_vers, 1);
+
+    bool prom_ok=false;
+    _type=0;
+
     // We read the calibration data registers
     if (_dev->read_registers(0xAA, bb.buff, sizeof(bb.buff))) {
         prom_ok=true;
