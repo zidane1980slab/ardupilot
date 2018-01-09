@@ -478,7 +478,6 @@ bool DataFlash_Revo::getSectorCount(uint32_t *ptr){
     uint8_t memtype =  (df_device>>8) & 0xFF;
     uint32_t size=0;
     
-    printf("SPI Flash codes: mfg=%x type=%x cap=%x\n ",df_manufacturer, memtype, capacity);
 
     const char * mfg=NULL;
     
