@@ -89,7 +89,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #if OPTFLOW == ENABLED
     SCHED_TASK(update_optical_flow,  200,    160),
 #endif
-    SCHED_TASK(update_batt_compass,   10,    120),
+    SCHED_TASK(update_batt_compass,   70,    120),
     SCHED_TASK(read_aux_switches,     10,     50),
     SCHED_TASK(arm_motors_check,      10,     50),
     SCHED_TASK(auto_disarm_check,     10,     50),
@@ -621,7 +621,10 @@ void Copter::read_AHRS(void)
 #endif
 
     // we tell AHRS to skip INS update as we have already done it in fast_loop()
-    ahrs.update(true);
+    if(g2.frame_class==AP_Motors::MOTOR_FRAME_ROTATIONAL_DUAL)
+    	ahrs.update(true, false);
+    else
+    	ahrs.update(true, true);
 }
 
 // read baro and rangefinder altitude at 10hz
