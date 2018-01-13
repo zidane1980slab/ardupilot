@@ -28,6 +28,7 @@ FRESULT SdFatFs::init(Sd2Card *card) {
     }
     
 #if defined(BOARD_DATAFLASH_FATFS) // in DataFlash
+    // always reformat internal flash
 
     printf("Formatting DataFlash to FAT..."); 
 
@@ -36,7 +37,6 @@ FRESULT SdFatFs::init(Sd2Card *card) {
     if( res == FR_OK){
         res = f_mount(&_SDFatFs, (TCHAR const*)_SDPath, 1);
         if(res == FR_OK) {
-
             printf(" OK!\n");
     	// FatFs Initialization done 
             return res;
