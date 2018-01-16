@@ -29,9 +29,6 @@
 
 
 
-#define DEBUG_LOOP_TIME
-
-
 
 /*
   useful macro for creating scheduler task table
