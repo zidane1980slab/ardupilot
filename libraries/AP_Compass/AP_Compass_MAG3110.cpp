@@ -24,6 +24,7 @@ extern const AP_HAL::HAL &hal;
 
 
 /*
+<<<<<<< HEAD
 EN:
     at first glance, the magnetometer MAG3110 consists only of flaws:
     * noisy, with a bad characteristic, with very large difference on axes
@@ -38,6 +39,8 @@ EN:
     appears in a completely new light - as a reliable info "north is there." What we really need.
 
 RUS:
+=======
+>>>>>>> readme changes
     на первый взгляд, магнитометр MAG3110 состоит из одних лишь недостатков:
     * шумный, с кривой характеристикой, 
     * никак не калибруется, приходится просто верить тому что он намерял
@@ -60,7 +63,6 @@ RUS:
 #ifndef MAG3110_ENABLE_LEN_FILTER
 #define MAG3110_ENABLE_LEN_FILTER 0
 #endif
-
 
 // Registers
 #define MAG3110_MAG_REG_STATUS       0x00
@@ -156,6 +158,11 @@ bool AP_Compass_MAG3110::_hardware_init()
     ack = _dev->write_register(MAG3110_MAG_REG_CTRL_REG2, 0xA0); // AUTO_MRST_EN + RAW
     if (!ack) goto exit;
 
+<<<<<<< HEAD
+=======
+//    hal.scheduler->delay(10);
+
+>>>>>>> * renamed board *_MP32V1F4 to *_Revolution to simplify things
     ret = true;
 
     _dev->set_retries(3);
@@ -207,8 +214,12 @@ void AP_Compass_MAG3110::_update()
 
 
     bool ret=true;
+<<<<<<< HEAD
 
 #if MAG3110_ENABLE_LEN_FILTER
+=======
+    
+>>>>>>> * renamed board *_MP32V1F4 to *_Revolution to simplify things
     float len = raw_field.length();
     if(is_zero(compass_len)) {
         compass_len=len;
@@ -225,7 +236,10 @@ void AP_Compass_MAG3110::_update()
             compass_len = compass_len * (1-FILTER_KOEF) + len*FILTER_KOEF; // complimentary filter 1/10 on good samples
         }
     }
+<<<<<<< HEAD
 #endif
+=======
+>>>>>>> * renamed board *_MP32V1F4 to *_Revolution to simplify things
     
     if(ret) {
 
@@ -282,3 +296,35 @@ void AP_Compass_MAG3110::read()
 
     publish_filtered_field(field, _compass_instance);
 }
+<<<<<<< HEAD
+=======
+
+/*
+bool AP_Compass_MAG3110::_mag_set_samplerate(uint16_t frequency)
+{
+    uint8_t setbits = 0;
+    uint8_t clearbits = REG5_RATE_BITS_M;
+
+    if (frequency == 0) {
+        frequency = 100;
+    }
+
+    if (frequency <= 25) {
+        setbits |= REG5_RATE_25HZ_M;
+        _mag_samplerate = 25;
+    } else if (frequency <= 50) {
+        setbits |= REG5_RATE_50HZ_M;
+        _mag_samplerate = 50;
+    } else if (frequency <= 100) {
+        setbits |= REG5_RATE_100HZ_M;
+        _mag_samplerate = 100;
+    } else {
+        return false;
+    }
+
+    _register_modify(ADDR_CTRL_REG5, clearbits, setbits);
+
+    return true;
+}
+*/
+>>>>>>> * renamed board *_MP32V1F4 to *_Revolution to simplify things
