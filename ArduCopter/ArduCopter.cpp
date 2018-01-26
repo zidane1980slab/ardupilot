@@ -497,6 +497,8 @@ void Copter::one_hz_loop()
         // set all throttle channel settings
         motors->set_throttle_range(channel_throttle->get_radio_min(), channel_throttle->get_radio_max());
 #endif
+        
+        barometer.update_alt_target(pos_control.get_alt_target()*0.01f);
     }
 
     // update assigned functions and enable auxiliary servos
@@ -547,6 +549,7 @@ void Copter::update_GPS(void)
 #if CAMERA == ENABLED
         camera.update();
 #endif
+        barometer.update_gps_alt(float(gps.location().alt)* (1/100.0) );
     }
 }
 
@@ -645,5 +648,7 @@ void Copter::update_altitude()
         Log_Write_Control_Tuning();
     }
 }
+
+
 
 AP_HAL_MAIN_CALLBACKS(&copter);
