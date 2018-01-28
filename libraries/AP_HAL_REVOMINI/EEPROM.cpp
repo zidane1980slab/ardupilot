@@ -130,20 +130,27 @@ uint16_t EEPROMClass::_CheckPage(uint32_t pageBase, uint16_t status)
 FLASH_Status EEPROMClass::_ErasePageByAddress(uint32_t Page_Address)
 {
 
-	int Page_Offset = Page_Address - 0x08000000; // calculates sector by address
-	uint32_t FLASH_Sector;
+    int Page_Offset = Page_Address - 0x08000000; // calculates sector by address
+    uint32_t FLASH_Sector;
 
-	if(Page_Offset < 0x10000) {
-		FLASH_Sector = Page_Offset / 0x4000; // 4 * 16K pages
-	} else if(Page_Offset < 0x20000) {
-		FLASH_Sector = 4;                    // 1 * 64K page
-	} else {
-		FLASH_Sector = 4 + Page_Offset / 0x20000; // all another pages of 128K
-	}
+    if(Page_Offset < 0x10000) {
+	FLASH_Sector = Page_Offset / 0x4000; // 4 * 16K pages
+    } else if(Page_Offset < 0x20000) {
+	FLASH_Sector = 4;                    // 1 * 64K page
+    } else {
+	FLASH_Sector = 4 + Page_Offset / 0x20000; // all another pages of 128K
+    }
 
-	FLASH_Status ret = FLASH_EraseSector(8 * FLASH_Sector, VoltageRange_3);
+    uint8_t n_try = 16;
+again:
+    FLASH_Status ret = FLASH_EraseSector(8 * FLASH_Sector, VoltageRange_3);
+
+    if(ret != FLASH_COMPLETE ) {
+        reset_flash_errors();
+        if(n_try-- > 0) goto again;
+    }
 	
-	return ret;
+    return ret;
 }
 
 /**
@@ -346,6 +353,7 @@ uint16_t EEPROMClass::_VerifyPageFullWriteVariable(uint16_t Address, uint16_t Da
 	FLASH_Status status;
 	uint32_t idx, pageBase, pageEnd, newPage;
 	uint16_t mycount;
+	uint16_t old_data;
 
 	// Get valid Page for write operation
 	pageBase = _FindValidPage();
@@ -354,15 +362,17 @@ uint16_t EEPROMClass::_VerifyPageFullWriteVariable(uint16_t Address, uint16_t Da
 
 	// Get the valid Page end Address
 	pageEnd = pageBase + PageSize;			// Set end of page
-
+	
+// read from end to begin
 	for (idx = pageEnd - 2; idx > pageBase; idx -= 4) { 
-		if (read_16(idx) == Address){		// Find last value for address
-			mycount = read_16(idx - 2);	// Read last data
-			if (mycount == Data)
-				return EEPROM_OK; // TODO: ERROR! this can be old data!
-			if (mycount == 0xFFFF || /* we can write - there is no '0' where we need '1' */ (~mycount & Data)==0 ) { 
+		if (read_16(idx) == Address){		// Find last value for address, will stop loop if found
+			old_data = read_16(idx - 2);	// Read last data
+			if (old_data == Data){
+			    return EEPROM_OK;   //      data already OK
+			}
+			if (old_data == 0xFFFF || /* we can write - there is no '0' where we need '1' */ (~old_data & Data)==0 ) { 
 				status = write_16(idx - 2, Data);	// Set variable data
-				if (status == FLASH_COMPLETE && read_16(idx - 2) == Data)
+				if (status == FLASH_COMPLETE && read_16(idx - 2) == Data) // check if writen
 					return EEPROM_OK;
 			}
 			break;

@@ -24,7 +24,6 @@ extern const AP_HAL::HAL &hal;
 
 
 /*
-<<<<<<< HEAD
 EN:
     at first glance, the magnetometer MAG3110 consists only of flaws:
     * noisy, with a bad characteristic, with very large difference on axes
@@ -39,8 +38,6 @@ EN:
     appears in a completely new light - as a reliable info "north is there." What we really need.
 
 RUS:
-=======
->>>>>>> readme changes
     на первый взгляд, магнитометр MAG3110 состоит из одних лишь недостатков:
     * шумный, с кривой характеристикой, 
     * никак не калибруется, приходится просто верить тому что он намерял
@@ -299,6 +296,7 @@ void AP_Compass_MAG3110::read()
 <<<<<<< HEAD
 =======
 
+<<<<<<< HEAD
 /*
 bool AP_Compass_MAG3110::_mag_set_samplerate(uint16_t frequency)
 {
@@ -328,3 +326,5 @@ bool AP_Compass_MAG3110::_mag_set_samplerate(uint16_t frequency)
 }
 */
 >>>>>>> * renamed board *_MP32V1F4 to *_Revolution to simplify things
+=======
+>>>>>>> * 4way-if adjusted to version 107
