@@ -76,17 +76,17 @@ extern uint32_t hal_micros();
 #define __FLASH__ __attr_flash
 
 #ifndef INLINE
-#define INLINE __attribute__ ((always_inline)) inline
+ #define INLINE __attribute__ ((always_inline)) inline
 #endif
 #define WEAK __attribute__((weak))
 
 #ifndef IN_CCM
-#define IN_CCM  __attribute__((section(".ccm")))
+ #define IN_CCM  __attribute__((section(".ccm")))
 #endif
 
 
-#define OK	1
-#define ERROR	0
+//#define OK	1
+//#define ERROR	0
 
 #define ADDRESS_IN_RAM(a) ((uint32_t)(a) >= SRAM1_BASE && (uint32_t)(a) < (uint32_t)(STM32_SRAM_END) )
 #define ADDRESS_IN_CCM(a) ((uint32_t)(a) >= CCMDATARAM_BASE && (uint32_t)(a) < (uint32_t)(STM32_CCM_END) )

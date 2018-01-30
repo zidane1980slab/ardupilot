@@ -85,7 +85,7 @@ static caddr_t _sbrk_ram(int nbytes) {
     uint32_t top = (uint32_t)get_stack_top();
 
     if ( top - 256 > (unsigned int)heap_ptr+nbytes // there is place in stack
-        || top < 0x20000000 ) //      or stack not in RAM TODO: check for RAM size from linker script
+        || top < SRAM1_BASE /* 0x20000000*/  ) //      or stack not in RAM 
     {
         base = heap_ptr;
         heap_ptr += nbytes;
@@ -108,7 +108,7 @@ static caddr_t _sbrk_ccm(int nbytes) {
 
     if(stack_bottom) top = (uint32_t)stack_bottom;
 
-    if ( top > (unsigned int)heap_ptr+nbytes) // there is place in stack
+    if ( top > (unsigned int)heap_ptr+nbytes) // there is place in stack, if stack in RAM it will be true too
     {
         base = heap_ptr;
         heap_ptr += nbytes;
@@ -126,13 +126,6 @@ caddr_t sbrk_ccm(int nbytes) {
 
 
 caddr_t _sbrk(int nbytes) {
-#if 0
-    if(!sbrk_need_dma) {
-    
-        uint32_t base = _sbrk_ccm(nbytes);
-        if( base != ((caddr_t)-1) ) return base;
-    }
-#endif
     return _sbrk_ram(nbytes);
     
 }

@@ -1,7 +1,6 @@
 /*
     (c) 2017 night_ghost@ykoctpa.ru
  
-
 */
 
 #include "nvic.h"
