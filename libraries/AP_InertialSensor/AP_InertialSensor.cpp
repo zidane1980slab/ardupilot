@@ -48,6 +48,11 @@ extern const AP_HAL::HAL& hal;
 #define DEFAULT_STILL_THRESH 0.1f
 #endif
 
+
+//the limit above which we should to use fourie transform (in degrees per second)
+#define GYRO_MAX_SPIN_RATE 180
+#define GYRO_MAX_SPIN_RATE_RAD radians(GYRO_MAX_SPIN_RATE)
+
 #define SAMPLE_UNIT 1
 
 #define GYRO_INIT_MAX_DIFF_DPS 0.1f
@@ -1978,4 +1983,30 @@ MAV_RESULT AP_InertialSensor::simple_accel_cal(AP_AHRS &ahrs)
     AP_Notify::flags.initialising = false;
 
     return result;
+}
+
+/*
+    if(abs(_ins.get_gyro().z)>GYRO_MAX_SPIN_RATE_RAD)
+    {
+        //hal.console->printf("pitch, yaw:%f    %f\n\n", _ins.get_pitch_angle_FT()*180.0/3.14, _ins.get_yaw_angle_FT()*180.0/3.14);
+
+        _dcm_matrix.from_euler(0.0f, _ins.get_pitch_angle_FT(), _ins.get_yaw_angle_FT());
+    }
+    accel.y=_fourier_analysis.get_magnitude();
+     accel.z=_fourier_analysis.get_angle();
+ 
+*/
+
+const inline Vector3f     &get_accel(uint8_t i) const {  }
+
+const Vector3f     &AP_InertialSensor::get_gyro(uint8_t i) const {
+    if(abs(_gyro[i].z)>GYRO_MAX_SPIN_RATE_RAD) {
+        Vector3f ret = _accel[i];;
+        ret.y = get_pitch_angle_FT();
+        ret.z = get_yaw_angle_FT();
+        return ret;
+        
+    } else {    
+        return _accel[i];
+    }
 }

@@ -96,12 +96,12 @@ public:
     ///
     /// @returns	vector of rotational rates in radians/sec
     ///
-    const Vector3f     &get_gyro(uint8_t i) const { return _gyro[i]; }
+    const Vector3f     &get_gyro(uint8_t i) const { return _gyro[i]; };
     const Vector3f     &get_gyro(void) const { return get_gyro(_primary_gyro); }
 
     // set gyro offsets in radians/sec
-    const Vector3f &get_gyro_offsets(uint8_t i) const { return _gyro_offset[i]; }
-    const Vector3f &get_gyro_offsets(void) const { return get_gyro_offsets(_primary_gyro); }
+    const inline Vector3f &get_gyro_offsets(uint8_t i) const { return _gyro_offset[i]; }
+    const inline Vector3f &get_gyro_offsets(void) const { return get_gyro_offsets(_primary_gyro); }
 
     //get delta angle if available
     bool get_delta_angle(uint8_t i, Vector3f &delta_angle) const;
@@ -121,26 +121,26 @@ public:
     ///
     /// @returns	vector of current accelerations in m/s/s
     ///
-    const Vector3f     &get_accel(uint8_t i) const { return _accel[i]; }
-    const Vector3f     &get_accel(void) const { return get_accel(_primary_accel); }
+    const inline Vector3f     &get_accel(uint8_t i) const;
+    const inline Vector3f     &get_accel(void) const { return get_accel(_primary_accel); }
 
     uint32_t get_gyro_error_count(uint8_t i) const { return _gyro_error_count[i]; }
     uint32_t get_accel_error_count(uint8_t i) const { return _accel_error_count[i]; }
 
     // multi-device interface
-    bool get_gyro_health(uint8_t instance) const { return (instance<_gyro_count) ? _gyro_healthy[instance] : false; }
-    bool get_gyro_health(void) const { return get_gyro_health(_primary_gyro); }
+    bool inline get_gyro_health(uint8_t instance) const { return (instance<_gyro_count) ? _gyro_healthy[instance] : false; }
+    bool inline get_gyro_health(void) const { return get_gyro_health(_primary_gyro); }
     bool get_gyro_health_all(void) const;
-    uint8_t get_gyro_count(void) const { return _gyro_count; }
-    bool gyro_calibrated_ok(uint8_t instance) const { return _gyro_cal_ok[instance]; }
+    uint8_t inline get_gyro_count(void) const { return _gyro_count; }
+    bool inline gyro_calibrated_ok(uint8_t instance) const { return _gyro_cal_ok[instance]; }
     bool gyro_calibrated_ok_all() const;
     bool use_gyro(uint8_t instance) const;
-    Gyro_Calibration_Timing gyro_calibration_timing() { return (Gyro_Calibration_Timing)_gyro_cal_timing.get(); }
+    inline Gyro_Calibration_Timing gyro_calibration_timing() { return (Gyro_Calibration_Timing)_gyro_cal_timing.get(); }
 
     bool get_accel_health(uint8_t instance) const { return (instance<_accel_count) ? _accel_healthy[instance] : false; }
     bool get_accel_health(void) const { return get_accel_health(_primary_accel); }
     bool get_accel_health_all(void) const;
-    uint8_t get_accel_count(void) const { return _accel_count; }
+    inline uint8_t get_accel_count(void) const { return _accel_count; }
     bool accel_calibrated_ok_all() const;
     bool use_accel(uint8_t instance) const;
 
@@ -149,18 +149,18 @@ public:
     uint16_t get_accel_rate_hz(uint8_t instance) const { return uint16_t(_accel_raw_sample_rates[instance] * _accel_over_sampling[instance]); }
 
     // get accel offsets in m/s/s
-    const Vector3f &get_accel_offsets(uint8_t i) const { return _accel_offset[i]; }
-    const Vector3f &get_accel_offsets(void) const { return get_accel_offsets(_primary_accel); }
+    const inline Vector3f &get_accel_offsets(uint8_t i) const { return _accel_offset[i]; }
+    const inline Vector3f &get_accel_offsets(void) const { return get_accel_offsets(_primary_accel); }
 
     // get accel scale
-    const Vector3f &get_accel_scale(uint8_t i) const { return _accel_scale[i]; }
-    const Vector3f &get_accel_scale(void) const { return get_accel_scale(_primary_accel); }
+    const inline Vector3f &get_accel_scale(uint8_t i) const { return _accel_scale[i]; }
+    const inline Vector3f &get_accel_scale(void) const { return get_accel_scale(_primary_accel); }
 
     // return a 3D vector defining the position offset of the IMU accelerometer in metres relative to the body frame origin
-    const Vector3f &get_imu_pos_offset(uint8_t instance) const {
+    const inline Vector3f &get_imu_pos_offset(uint8_t instance) const {
         return _accel_pos[instance];
     }
-    const Vector3f &get_imu_pos_offset(void) const {
+    const inline Vector3f &get_imu_pos_offset(void) const {
         return _accel_pos[_primary_accel];
     }
 
@@ -192,16 +192,16 @@ public:
     }
 
     // return the selected sample rate
-    uint16_t get_sample_rate(void) const { return _sample_rate; }
+    uint16_t inline get_sample_rate(void) const { return _sample_rate; }
 
     // return the main loop delta_t in seconds
-    float get_loop_delta_t(void) const { return _loop_delta_t; }
+    float inline get_loop_delta_t(void) const { return _loop_delta_t; }
 
     uint16_t error_count(void) const { return 0; }
     bool healthy(void) const { return get_gyro_health() && get_accel_health(); }
 
-    uint8_t get_primary_accel(void) const { return _primary_accel; }
-    uint8_t get_primary_gyro(void) const { return _primary_gyro; }
+    uint8_t inline get_primary_accel(void) const { return _primary_accel; }
+    uint8_t inline get_primary_gyro(void) const { return _primary_gyro; }
 
     // enable HIL mode
     void set_hil_mode(void) { _hil_mode = true; }

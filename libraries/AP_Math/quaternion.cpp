@@ -1,20 +1,20 @@
 /*
-* quaternion.cpp
-* Copyright (C) Andrew Tridgell 2012
-*
-* This file is free software: you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This file is distributed in the hope that it will be useful, but
-* WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * quaternion.cpp
+ * Copyright (C) Andrew Tridgell 2012
+ *
+ * This file is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This file is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #pragma GCC optimize("O3")
 
@@ -333,19 +333,13 @@ Quaternion Quaternion::operator*(const Quaternion &v) const
 
 Quaternion Quaternion::operator*(const float &k) const
 {
-	Quaternion ret;
-	const float &w1 = q1;
-    const float &w2 = q2;
-    const float &w3 = q3;
-    const float &w4 = q4;
+    Quaternion ret;
 	
-    ret.q1=w1*k;
-    ret.q2=w2*k;
-    ret.q3=w3*k;
-    ret.q4=w4*k;
-    
-	
-	return ret;
+    ret.q1=q1*k;
+    ret.q2=q2*k;
+    ret.q3=q3*k;
+    ret.q4=q4*k;
+    return ret;
 }
 
 Quaternion &Quaternion::operator*=(const Quaternion &v)
@@ -371,10 +365,10 @@ Quaternion &Quaternion::operator*=(const Quaternion &v)
 Quaternion Quaternion::operator/(const Quaternion &v) const
 {
     Quaternion ret;
-    const float &quat0 = q1;
-    const float &quat1 = q2;
-    const float &quat2 = q3;
-    const float &quat3 = q4;
+    float quat0 = q1;
+    float quat1 = q2;
+    float quat2 = q3;
+    float quat3 = q4;
     
     float rquat0 = v.q1;
     float rquat1 = v.q2;
