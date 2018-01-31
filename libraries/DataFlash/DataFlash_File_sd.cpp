@@ -1082,7 +1082,7 @@ void DataFlash_File::_io_timer(void)
          */
         _write_fd.sync();
         
-#if defined(BOARD_DATAFLASH_FATFS)    // limit file size in some MBytes and reopen new log file
+#if 0 && defined(BOARD_DATAFLASH_FATFS)    // limit file size in some MBytes and reopen new log file
 
         if(_write_fd.size() >= MAX_FILE_SIZE) { // size > 2M
             stop_logging(); 

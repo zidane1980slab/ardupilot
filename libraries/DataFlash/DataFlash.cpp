@@ -355,6 +355,8 @@ bool DataFlash_Class::logging_enabled() const
 }
 bool DataFlash_Class::logging_failed() const
 {
+    if(_params.backend_types==0) return false;
+
     if (_next_backend < 1) {
         // we should not have been called!
         return true;
