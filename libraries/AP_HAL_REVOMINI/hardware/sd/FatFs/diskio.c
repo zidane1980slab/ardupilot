@@ -94,7 +94,6 @@ DRESULT disk_write (
 	UINT count			/* Number of sectors to write */
 )
 {
-
 	switch (pdrv) {
 	case DEV_SD :
 	    return sd_write(buff, sector, count);

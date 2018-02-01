@@ -899,13 +899,37 @@ static uint32_t erase_size = BOARD_DATAFLASH_ERASE_SIZE;
  #endif
 
 #pragma pack(push,1)
-
 static struct {
     uint8_t cmd[4]; // for DMA transfer
     uint8_t sector[DF_PAGE_SIZE]; // we ALWAYS can use DMA!
 } buf;
-
 #pragma pack(pop)
+
+
+//[ task management for USB MSC mode
+void  hal_set_task_active(void * handle);
+void  hal_context_switch_isr();
+void *hal_register_task(voidFuncPtr task, uint32_t stack);
+void  hal_set_task_priority(void * handle, uint8_t prio);
+bool hal_is_armed();
+//]
+    
+#define FLASH_ERASE_QUEUE_SIZE 16
+
+static void *_flash_erase_task IN_CCM;
+static volatile uint16_t fe_read_ptr IN_CCM;
+static volatile uint16_t fe_write_ptr IN_CCM;
+typedef struct {
+    uint32_t b;
+    uint32_t e;
+} fe_item;
+
+static fe_item flash_erase_queue[FLASH_ERASE_QUEUE_SIZE] IN_CCM;
+static void * _flash_erase_task IN_CCM;
+
+static void sd_flash_eraser();
+    
+
 
 static bool chip_is_clear=false;
 
@@ -1240,6 +1264,12 @@ DSTATUS sd_initialize () {
 
     initialized=1;
 
+#if 0
+    void *task = hal_register_task(sd_flash_eraser, 512); // only for one context
+    hal_set_task_priority(task, 110);                  // 5 higher than IO
+    _flash_erase_task=task;
+#endif
+
     Stat=0;
     return Stat;
 }
@@ -1474,6 +1504,23 @@ DRESULT sd_write (
 /* Miscellaneous drive controls other than data read/write               */
 /*-----------------------------------------------------------------------*/
 
+static inline void enqueue_flash_erase(uint32_t from, uint32_t to){
+
+    int16_t new_wp = fe_write_ptr+1;
+    if(new_wp >= FLASH_ERASE_QUEUE_SIZE) { // move write pointer
+        new_wp=0;                         // ring
+    }
+    while(new_wp == fe_read_ptr) hal_yield(0); // buffer overflow
+
+    flash_erase_queue[fe_write_ptr].b = from;
+    flash_erase_queue[fe_write_ptr].e = to;
+
+    fe_write_ptr=new_wp; // move forward
+
+    hal_set_task_active(_flash_erase_task);
+}
+
+
 DRESULT sd_ioctl (
 	uint8_t ctl,		/* Control command code */
 	void *buff		/* Pointer to the conrtol data */
@@ -1535,9 +1582,17 @@ DRESULT sd_ioctl (
             if(chip_is_clear) { // just after full erase
     	        res = RES_OK;	    
     	        chip_is_clear=false;
-                break;
+                return res;
             }
 
+            if(hal_is_armed()) return RES_OK;
+
+#if 0 // in separate thread
+
+            erase_page(start_sector * (FAT_SECTOR_SIZE/DF_PAGE_SIZE));    // clear 1st sector of DataFlash
+
+            enqueue_flash_erase(start_sector+(erase_size/DF_PAGE_SIZE), end_sector); //and enqueue
+#else
             uint32_t  sector;
 	    for(sector=start_sector; sector <= end_sector;sector++){
                 uint32_t  df_sect = sector * (FAT_SECTOR_SIZE/DF_PAGE_SIZE);    // sector in DataFlash
@@ -1551,6 +1606,7 @@ DRESULT sd_ioctl (
                     digitalToggle(HAL_GPIO_A_LED_PIN);
                 }
             }
+#endif
 	    res = RES_OK;
 	    
             } break;
@@ -1569,6 +1625,35 @@ DRESULT sd_ioctl (
 }
 
 
+static void sd_flash_eraser(){
+    while(fe_read_ptr != fe_write_ptr) { // there are samples
+
+        uint32_t  start_sector = flash_erase_queue[fe_read_ptr].b;
+        uint32_t  end_sector   = flash_erase_queue[fe_read_ptr].e;
+
+        fe_read_ptr++;
+        if(fe_read_ptr >= FLASH_ERASE_QUEUE_SIZE) { // move read pointer
+            fe_read_ptr=0;                         // ring
+        }
+
+        uint32_t  block, last_block=-1;
+
+        uint32_t  sector;
+        for(sector=start_sector; sector <= end_sector;sector++){
+            uint32_t  df_sect = sector * (FAT_SECTOR_SIZE/DF_PAGE_SIZE);    // sector in DataFlash
+            block = df_sect / (erase_size/DF_PAGE_SIZE);    // number of EraseBlock
+            if(last_block!=block){
+                last_block=block;
+                erase_page(df_sect);
+                putch('.');
+//                    extern void digitalToggle(uint8_t pin);
+//                    digitalToggle(HAL_GPIO_A_LED_PIN);
+            }
+        }
+    }
+}
+
+
 /*-----------------------------------------------------------------------*/
 /* Device timer function                                                 */
 /*-----------------------------------------------------------------------*/
@@ -1578,13 +1663,12 @@ DRESULT sd_ioctl (
 
 void sd_timerproc (void)
 {
-	uint16_t n;
+    uint16_t n;
 
-	n = Timer1;						/* 1kHz decrement timer stopped at 0 */
-	if (n) Timer1 = --n;
-	n = Timer2;
-	if (n) Timer2 = --n;
-
+    n = Timer1;						/* 1kHz decrement timer stopped at 0 */
+    if (n) Timer1 = --n;
+    n = Timer2;
+    if (n) Timer2 = --n;
 }
 
 

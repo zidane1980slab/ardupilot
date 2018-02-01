@@ -1015,6 +1015,10 @@ int16_t osd_getc(){ // get char from ring buffer
     return rb_remove(&osd_rxrb);
 }
 
+uint32_t osd_txspace() {
+    return osd_txrb.size - rb_full_count(&osd_txrb);
+}
+
 
 void osd_putc(uint8_t c){ 
     uint8_t cnt=10;

@@ -44,6 +44,20 @@ FRESULT SdFatFs::init(Sd2Card *card) {
             return res;
         }
 
+    return res;
+}
+
+
+FRESULT SdFatFs::format(const char *filepath, Sd2Card *card){
+#if defined(BOARD_DATAFLASH_FATFS) // in DataFlash
+
+    _card->ioctl(CTRL_FORMAT,0); // clear chip
+
+#endif
+    FRESULT res = f_mkfs(filepath, 1 /* unpartitioned */, card->blockSize() /* cluster in sectors */);
+
+    if(res == FR_OK){
+        res = f_mount(&_SDFatFs, filepath, 1);
     }
 
     printf(" Error: %s!\n", strError(res));

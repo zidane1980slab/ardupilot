@@ -25,6 +25,8 @@ public:
         }
     }
     
+    inline bool get_soft_armed() { return soft_armed; }
+    
     uint64_t get_system_clock_ms() const {
         int32_t offs=  hal_param_helper->_time_offset * 3600 * 1000; // in ms
         

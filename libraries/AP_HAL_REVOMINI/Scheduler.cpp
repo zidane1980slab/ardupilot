@@ -238,8 +238,9 @@ void REVOMINIScheduler::init()
     set_task_priority(task, 255);                       // lowest possible, to fill delay()
     _idle_task=(task_t *)task;
     set_task_active(task);                              // tasks are created paused so run it
-
 }
+
+
 
 // it can't be started on init() because should be stopped in later_init()
 void REVOMINIScheduler::start_stats_task(){
@@ -1416,3 +1417,4 @@ void * hal_register_task(voidFuncPtr task, uint32_t stack) {
 }
 
 //void hal_panic(const char *errormsg, ...) { AP_HAL::pa}
+bool hal_is_armed() { return hal.util->get_soft_armed();  }

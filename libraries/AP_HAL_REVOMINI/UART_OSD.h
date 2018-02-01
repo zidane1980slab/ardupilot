@@ -29,7 +29,7 @@ public:
     inline bool tx_pending() {   return 0; }
 
     uint32_t available() override;
-    uint32_t inline  txspace() override {    return 255; }
+    uint32_t txspace() override;
     int16_t read() override;
 
     size_t write(uint8_t c);

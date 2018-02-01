@@ -30,6 +30,7 @@ namespace OSDns {// OSD interface emulates UART
     int16_t osd_getc();
     void osd_dequeue();
 
+    uint32_t osd_txspace();
     void osd_putc(uint8_t c); 
 
     void max_do_transfer(const uint8_t *buffer, uint16_t len);

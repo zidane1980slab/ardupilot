@@ -32,7 +32,7 @@
 
 
 #define MAIN_STACK_SIZE     4096U+1024U // measured use of stack is only 1.5K - but it grows up to 3K when using FatFs, also this includes 1K stack for ISR
-#define IO_STACK_SIZE       2048U   // IO_tasks stack size - io_thread can do work with filesystem
+#define IO_STACK_SIZE       4096U   // IO_tasks stack size - io_thread can do work with filesystem
 #define DEFAULT_STACK_SIZE  1024U   // Default tasks stack size 
 #define SMALL_TASK_STACK    1024U   // small stack for sensors
 #define STACK_MAX          65536U
@@ -112,6 +112,8 @@ extern "C" {
 
     extern caddr_t stack_bottom; // for SBRK check
     
+    bool hal_is_armed();
+    
 // publish to low-level functions
     void hal_yield(uint16_t ttw);
     void hal_delay(uint16_t t);
@@ -124,6 +126,8 @@ extern "C" {
     void hal_context_switch_isr();
     void * hal_register_task(voidFuncPtr task, uint32_t stack);
     void hal_set_task_priority(void * handle, uint8_t prio);
+    
+    void enqueue_flash_erase(uint32_t from, uint32_t to);
 }
 
 
@@ -467,7 +471,8 @@ public:
         _delay_timer_proc=0;
     }
 #endif
-    
+
+
 protected:
 
 //{ multitask
@@ -590,7 +595,6 @@ private:
     static uint32_t MPU_count;
     static uint32_t MPU_Time;
 #endif
-    
     
 };
 

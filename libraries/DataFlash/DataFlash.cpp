@@ -477,6 +477,8 @@ void DataFlash_Class::EraseAll() {
 }
 // change me to "LoggingAvailable"?
 bool DataFlash_Class::CardInserted(void) {
+    if(_params.backend_types == 0) return true; // logging disabled
+    
     for (uint8_t i=0; i< _next_backend; i++) {
         if (backends[i]->CardInserted()) {
             return true;

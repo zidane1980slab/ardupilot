@@ -51,6 +51,10 @@ int16_t UART_OSD::read() {
     return OSDns::osd_getc();
 }
 
+uint32_t UART_OSD::txspace() {
+    return OSDns::osd_txspace();
+}
+
 size_t UART_OSD::write(uint8_t c) {
 
     if (!_initialized) { 

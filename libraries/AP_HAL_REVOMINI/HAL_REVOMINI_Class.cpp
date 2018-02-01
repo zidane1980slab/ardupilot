@@ -593,10 +593,10 @@ done:
 void HAL_REVOMINI::connect_uart(AP_HAL::UARTDriver* uartL,AP_HAL::UARTDriver* uartR, AP_HAL::Proc proc){
     while(1){
         bool got=false;
-        if(uartL->available()) { uartR->write(uartL->read()); got=true; }
-        if(uartR->available()) { uartL->write(uartR->read()); got=true; }
+        if(uartL->available() && uartR->txspace()) { uartR->write(uartL->read()); got=true; }
+        if(uartR->available() && uartL->txspace()) { uartL->write(uartR->read()); got=true; }
         if(proc) proc();
-        if(!got) REVOMINIScheduler::yield(300); // give a chance to other threads
+        if(!got) REVOMINIScheduler::yield(100); // give a chance to other threads
         if(state.disconnect) break; // if USB disconnected
     }
 }

@@ -173,21 +173,28 @@ void __attribute__((noreturn)) __error(uint32_t num, uint32_t pc, uint32_t lr)
 
     if(boardEmergencyHandler) boardEmergencyHandler(); // call emergency handler
 
-#ifdef ERROR_USART
+#if 0
+ #ifdef ERROR_USART
     usart_putstr(ERROR_USART, "\r\n!!! Exception: ");
-#ifdef DEBUG_BUILD
+  #ifdef DEBUG_BUILD
     usart_putstr(ERROR_USART, faults[num]);
-#else
+  #else
     usart_putudec(ERROR_USART, num);
-#endif
+  #endif
     usart_putstr(ERROR_USART, " at ");
     usart_putudec(ERROR_USART, pc);
     usart_putstr(ERROR_USART, " lr ");
     usart_putudec(ERROR_USART, lr);
     usart_putc(ERROR_USART, '\n');
     usart_putc(ERROR_USART, '\r');
+ #endif
+#else
+ #ifdef DEBUG_BUILD
+    printf("\r\n!!! Exception: %s at %x LR=%x\n",faults[num], pc, lr);
+ #else
+    printf("\r\n!!! Exception: %d at %x LR=%x\n",num, pc, lr);
+ #endif
 #endif
-
     error_throb(num);
 }
 
