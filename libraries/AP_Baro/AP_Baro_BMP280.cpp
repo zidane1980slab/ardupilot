@@ -15,6 +15,7 @@
 #include "AP_Baro_BMP280.h"
 
 #include <utility>
+#include <stdio.h>
 
 extern const AP_HAL::HAL &hal;
 
@@ -135,8 +136,9 @@ void AP_Baro_BMP280::_timer(void)
 
     _dev->get_semaphore()->give();  // give bus semaprore ASAP
 
-    _update_temperature((buf[3] << 12) | (buf[4] << 4) | (buf[5] >> 4));
-    _update_pressure((buf[0] << 12) | (buf[1] << 4) | (buf[2] >> 4));
+    if(_update_temperature((buf[3] << 12) | (buf[4] << 4) | (buf[5] >> 4))) {
+        _update_pressure((buf[0] << 12) | (buf[1] << 4) | (buf[2] >> 4));
+    }
     return;
 }
 
@@ -156,7 +158,7 @@ void AP_Baro_BMP280::update(void)
 }
 
 // calculate temperature
-void AP_Baro_BMP280::_update_temperature(int32_t temp_raw)
+bool AP_Baro_BMP280::_update_temperature(int32_t temp_raw)
 {
     int32_t var1, var2, t;
 
@@ -165,10 +167,35 @@ void AP_Baro_BMP280::_update_temperature(int32_t temp_raw)
     var2 = (((((temp_raw >> 4) - ((int32_t)_t1)) * ((temp_raw >> 4) - ((int32_t)_t1))) >> 12) * ((int32_t)_t3)) >> 14;
     _t_fine = var1 + var2;
     t = (_t_fine * 5 + 128) >> 8;
-    if (_sem->take(HAL_SEMAPHORE_BLOCK_FOREVER)) {
-        _temperature = ((float)t) / 100;
-        _sem->give();
+
+    float temp = ((float)t) / 100;
+
+    bool ret=true;
+    
+    if(is_zero(_mean_temp)) {
+        _mean_temp=temp;
+    } else {
+#define FILTER_KOEF 0.1
+
+        float d = abs(_mean_temp-temp)/(_mean_temp+temp);
+        if(d*100 > 10) { // difference more than 20% from mean value
+            printf("\nBaro temp error: mean %f got %f\n", _mean_temp, temp );
+            ret= false;
+            float k = FILTER_KOEF / (d*10); // 2.5 and more, so one bad sample never change mean more than 4%
+            _mean_temp = _mean_temp * (1-k) + temp*k; // complimentary filter 1/k on bad samples
+        } else {
+            _mean_temp = _mean_temp * (1-FILTER_KOEF) + temp*FILTER_KOEF; // complimentary filter 1/10 on good samples
+        }
     }
+    
+    if(ret) {
+        if (_sem->take(HAL_SEMAPHORE_BLOCK_FOREVER)) {
+            _temperature = temp;
+            _sem->give();
+        }
+        return true;
+    } 
+    return false;
 }
 
 // calculate pressure

@@ -63,4 +63,6 @@ private:
 
     uint8_t _vers;
     uint8_t _type;
+    
+    float _mean_pressure;    
 };

@@ -1037,6 +1037,9 @@ private:
     Mode *mode_from_mode_num(const uint8_t mode);
     void exit_mode(Mode *&old_flightmode, Mode *&new_flightmode);
 
+    uint32_t _position_lost_time;
+    bool _last_position_ok;
+
 public:
     void mavlink_delay_cb();    // GCS_Mavlink.cpp
     void failsafe_check();      // failsafe.cpp

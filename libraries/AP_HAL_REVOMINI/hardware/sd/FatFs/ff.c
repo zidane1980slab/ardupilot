@@ -2783,7 +2783,10 @@ FRESULT f_write (
 #endif
 						clst = create_chain(fp->fs, fp->clust);	/* Follow or stretch cluster chain on the FAT */
 				}
-				if (clst == 0) break;		/* Could not allocate a new cluster (disk full) */
+				if (clst == 0) { /* Could not allocate a new cluster (disk full) */
+				    res=FR_NOT_ENABLED; // was FR_DENIED;  - @NG
+				    break;	
+				}
 				if (clst == 1) ABORT(fp->fs, FR_INT_ERR);
 				if (clst == 0xFFFFFFFF) ABORT(fp->fs, FR_DISK_ERR);
 				fp->clust = clst;			/* Update current cluster */
