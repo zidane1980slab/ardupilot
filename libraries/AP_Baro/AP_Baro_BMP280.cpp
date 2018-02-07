@@ -170,32 +170,11 @@ bool AP_Baro_BMP280::_update_temperature(int32_t temp_raw)
 
     float temp = ((float)t) / 100;
 
-    bool ret=true;
-    
-    if(is_zero(_mean_temp)) {
-        _mean_temp=temp;
-    } else {
-#define FILTER_KOEF 0.1
-
-        float d = abs(_mean_temp-temp)/(_mean_temp+temp);
-        if(d*100 > 10) { // difference more than 20% from mean value
-            printf("\nBaro temp error: mean %f got %f\n", _mean_temp, temp );
-            ret= false;
-            float k = FILTER_KOEF / (d*10); // 2.5 and more, so one bad sample never change mean more than 4%
-            _mean_temp = _mean_temp * (1-k) + temp*k; // complimentary filter 1/k on bad samples
-        } else {
-            _mean_temp = _mean_temp * (1-FILTER_KOEF) + temp*FILTER_KOEF; // complimentary filter 1/10 on good samples
-        }
+    if (_sem->take(HAL_SEMAPHORE_BLOCK_FOREVER)) {
+        _temperature = temp;
+        _sem->give();
     }
-    
-    if(ret) {
-        if (_sem->take(HAL_SEMAPHORE_BLOCK_FOREVER)) {
-            _temperature = temp;
-            _sem->give();
-        }
-        return true;
-    } 
-    return false;
+    return true;
 }
 
 // calculate pressure
@@ -221,9 +200,31 @@ void AP_Baro_BMP280::_update_pressure(int32_t press_raw)
     var2 = (((int64_t)_p8) * p) >> 19;
     p = ((p + var1 + var2) >> 8) + (((int64_t)_p7) << 4);
 
-    if (_sem->take(HAL_SEMAPHORE_BLOCK_FOREVER)) {
-        _pressure = (float)p / 256;
-        _has_sample = true;
-        _sem->give();
+    bool ret=true;
+
+    float press = p / 256.0;
+    
+    if(is_zero(_mean_pressure)) {
+        _mean_pressure=press;
+    } else {
+#define FILTER_KOEF 0.1
+
+        float d = abs(_mean_pressure-press)/(_mean_pressure+press);
+        if(d*100 > 10) { // difference more than 20% from mean value
+            printf("\nBaro pressure error: mean %f got %f\n", _mean_pressure, press );
+            ret= false;
+            float k = FILTER_KOEF / (d*10); // 2.5 and more, so one bad sample never change mean more than 4%
+            _mean_pressure = _mean_pressure * (1-k) + press*k; // complimentary filter 1/k on bad samples
+        } else {
+            _mean_pressure = _mean_pressure * (1-FILTER_KOEF) + press*FILTER_KOEF; // complimentary filter 1/10 on good samples
+        }
+    }
+
+    if(ret) {
+        if (_sem->take(HAL_SEMAPHORE_BLOCK_FOREVER)) {
+            _pressure = press;
+            _has_sample = true;
+            _sem->give();
+        }
     }
 }

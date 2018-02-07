@@ -1035,7 +1035,7 @@ task_t *REVOMINIScheduler::get_next_task(){
                     timeFromLast = now - ptr->time_start; // time from last run
                     if( timeFromLast < ptr->period) {     //   is less than task's period?
                         remains = ptr->period - timeFromLast;
-                        if(remains>10) {
+                        if(remains>4) {
                             if(remains<partial_quant && ptr->curr_prio <= want_tail->curr_prio) { // exclude low-prio tasks
                                 partial_quant=remains; // minimal time remains to next task
                                 want_tail = ptr;
@@ -1121,7 +1121,7 @@ skip_task:
 
 #endif
 
-    if(want_tail && want_tail->curr_prio < task->curr_prio) { // we have a high-prio task that want to be started next in the middle of tick
+    if(want_tail && want_tail->curr_prio <= task->curr_prio) { // we have a high-prio task that want to be started next in the middle of tick
         if(partial_quant < TIMER_PERIOD-10) { // if time less than tick
             timer_set_count(TIMER14, 0);
             timer_set_reload(TIMER14, partial_quant+2); // +2 to guarantee
@@ -1138,7 +1138,7 @@ skip_task:
     interrupt to reduce timeslice quant
 */
 void REVOMINIScheduler::_tail_timer_event(uint32_t v /*TIM_TypeDef *tim */){
-    timer_pause(TIMER14);
+    timer_pause(TIMER14); // stop tail timer
     timer_generate_update(TIMER7); // tick is over
 #ifndef MTASK_PROF
     _switch_task();
@@ -1267,6 +1267,7 @@ void PendSV_Handler(){
 void SVC_Handler(){
     uint32_t * svc_args;
     
+// SVC can't be used from any interrupt so this is only for reliability
     asm volatile (
         "TST lr, #4     \n"  
         "ite eq         \n"
@@ -1407,7 +1408,7 @@ void hal_delay_microseconds(uint16_t t){ REVOMINIScheduler::_delay_microseconds(
 uint32_t hal_micros() { return REVOMINIScheduler::_micros(); }
 void hal_isr_time(uint32_t t) { s_running->in_isr += t; }
 
-// task management for USB
+// task management for USB and another C code
 void hal_set_task_active(void * h) { REVOMINIScheduler::set_task_active(h); } 
 void hal_context_switch_isr() { REVOMINIScheduler::context_switch_isr(); }
 void hal_set_task_priority(void * h, uint8_t prio) {REVOMINIScheduler::set_task_priority(h, prio); }

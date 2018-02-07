@@ -32,7 +32,7 @@
 
 
 #define MAIN_STACK_SIZE     4096U+1024U // measured use of stack is only 1.5K - but it grows up to 3K when using FatFs, also this includes 1K stack for ISR
-#define IO_STACK_SIZE       4096U   // IO_tasks stack size - io_thread can do work with filesystem
+#define IO_STACK_SIZE       4096U   // IO_tasks stack size - io_thread can do work with filesystem, stack overflows if 2K
 #define DEFAULT_STACK_SIZE  1024U   // Default tasks stack size 
 #define SMALL_TASK_STACK    1024U   // small stack for sensors
 #define STACK_MAX          65536U
@@ -59,11 +59,11 @@ struct task_t {
         uint8_t priority;               // base priority of task
         uint8_t curr_prio;              // current priority of task, usually higher than priority
         bool active;                    // task still not ended
-        bool f_yield;                   // task gives its quant voluntary
+        bool f_yield;                   // task gives its quant voluntary (to not call it again)
         uint32_t ttw;                   // time to wait - for delays and IO
-        uint32_t t_yield;               // time of starting of yield
+        uint32_t t_yield;               // time when task loose control
         uint32_t period;                // if set then task will start on time basis
-        uint32_t time_start;            // start time of task
+        uint32_t time_start;            // start time of task (for periodic tasks)
         REVOMINI::Semaphore *sem;       // task should start after owning this semaphore
         REVOMINI::Semaphore *sem_wait;  // task is waiting this semaphore
         uint32_t sem_time;              // max time to wait semaphore
@@ -335,10 +335,10 @@ public:
 #if defined(USE_MPU)
         mpu_disable();      // we need access to write
 #endif
-        task_t * task = (task_t*)h; 
+        task_t * task = (task_t*)h; // called from ISR so don't need disabling interrupts when writes to TCB
         task->ttw=0;  
         task->active=true;
-        _forced_task = task; // force it
+        _forced_task = task; // force it, to not spent time for  search by priority
         context_switch_isr();
   } 
 #endif
@@ -456,23 +456,6 @@ public:
 
     static void start_stats_task(); // it interferes with CONNECT_COM and CONNECT_ESC so should be started last
 
-#if 0 // not used
-    
-    // call a handler after some time 
-    static inline void do_delayed_proc(Handler h, uint16_t dly){  
-        while(_delay_timer_proc); // wait for prevoius task
-        _delay_timer_proc = h;
-        timer_set_reload(TIMER11, dly);
-        timer_resume(TIMER11);
-    }
-    // cancel setted delayed proc if any
-    static inline void cancel_delayed_proc() {
-        timer_pause(TIMER11);
-        _delay_timer_proc=0;
-    }
-#endif
-
-
 protected:
 
 //{ multitask
@@ -489,7 +472,6 @@ protected:
 */
     static void *init_task(uint64_t h, const uint8_t* stack);
 
-
     static uint32_t fill_task(task_t &tp);      // prepares task's TCB
     static void enqueue_task(task_t &tp);       // add new task to run queue
     static void dequeue_task(task_t &tp);       // remove task from run queue
@@ -498,13 +480,13 @@ protected:
     static void switch_task();
     static void _switch_task();
 
-    static task_t s_main; // main task TCB
-    static size_t s_top; // Task stack allocation top. 
+    static task_t s_main;   // main task TCB
+    static size_t s_top;    // Task stack allocation top. 
     static uint16_t task_n; // counter of tasks
 
-    static task_t *_idle_task; // remember TCB of idle task
+    static task_t *_idle_task;   // remember TCB of idle task
     static task_t *_forced_task; // task activated from ISR so should be called without prioritization
-    static void *boost_task;    // task that called delay_boost()
+    static void *boost_task;     // task that called delay_boost()
     
     static void check_stack(uint32_t sp);
  
@@ -541,7 +523,6 @@ private:
     static Handler on_disarm_handler;
 
     static void _print_stats();
-//    static volatile Handler _delay_timer_proc; not used
 
     static uint32_t lowest_stack;
     
