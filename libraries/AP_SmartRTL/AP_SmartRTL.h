@@ -8,6 +8,8 @@
 #include <DataFlash/DataFlash.h>
 #include <GCS_MAVLink/GCS.h>
 
+#define USE_WAYBACK
+
 // definitions and macros
 #define SMARTRTL_ACCURACY_DEFAULT        2.0f   // default _ACCURACY parameter value.  Points will be no closer than this distance (in meters) together.
 #ifdef USE_WAYBACK

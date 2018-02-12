@@ -12,9 +12,6 @@ the shortest way to home via visited points.
 
 #pragma GCC optimize ("O2")
 
-
-#define WAYBACK_PRIORITY 116 // speed 1/16 of main task
-
 #include "AP_WayBack.h"
 #include <GCS_MAVLink/GCS.h>
 
@@ -96,34 +93,39 @@ void AP_WayBack::init()
     if(initialized) return;
     
     _epsilon = TRACK_EPS; // initial track error
-/*
-#if CONFIG_HAL_BOARD == HAL_BOARD_REVOMINI
-    _task = REVOMINIScheduler::start_task(FUNCTOR_BIND_MEMBER(&AP_WayBack::tick, void), 2048);
-    if(_task){
-        REVOMINIScheduler::set_task_priority(_task, WAYBACK_PRIORITY); // max speed 1/16 of main task
-        REVOMINIScheduler::set_task_period(_task, 100000); // setting of period allows task to run
-        initialized=true;
-    }
-#else
-    hal.scheduler->register_io_process(FUNCTOR_BIND_MEMBER(&AP_WayBack::tick, void));
-#endif
-*/
+
     initialized=true;
 }
 
 void AP_WayBack::init(float eps, uint16_t points, bool bs /*, AP_AHRS& ahrs*/ ) // mimics version
 {
+// reset data
+    num_points=0;
+    points_count=0;
+    last_loop_check=2; // last leg checked for loop
+    last_reduce=0;     // last leg checked for reduce
+
+    last_point_time=0; // definitely less than current millis()
+    last_big_reduce=0;
+    last_raw_point=0;   
+        
+    max_alt=0;
+
     if(initialized) return;
     
     _epsilon = eps;
     _points_max = points;
     _params.blind_shortcut=bs;
+
+
     
     initialized=true;
+
     
 }
 
 
+// turns on recording, start or restart
 bool AP_WayBack::start(){
     if(!initialized) init();
     if(points==NULL) {
@@ -146,11 +148,11 @@ DBG_PRINTF("\nAP_WayBack: allocating memory for %d poins\n", max_num_points);
         
 
 // moved starting task here to it be the last one
-#if CONFIG_HAL_BOARD == HAL_BOARD_REVOMINI
-        _task = REVOMINIScheduler::start_task(FUNCTOR_BIND_MEMBER(&AP_WayBack::tick, void), 2048);
+#if CONFIG_HAL_BOARD == HAL_BOARD_F4LIGHT
+        _task = Scheduler::start_task(FUNCTOR_BIND_MEMBER(&AP_WayBack::tick, void), 2048);
         if(_task){
-            REVOMINIScheduler::set_task_priority(_task, WAYBACK_PRIORITY); // max speed 1/16 of main task
-            REVOMINIScheduler::set_task_period(_task, 100000); // setting of period allows task to run, 10Hz
+            Scheduler::set_task_priority(_task, WAYBACK_PRIORITY); // max speed 1/16 of main task
+            Scheduler::set_task_period(_task, 100000); // setting of period allows task to run, 10Hz
             initialized=true;
         } else return false; // no stack space to start a task
 #else
@@ -159,28 +161,16 @@ DBG_PRINTF("\nAP_WayBack: allocating memory for %d poins\n", max_num_points);
 #endif
 
     }
-
-// reset data
-    num_points=0;
-    points_count=0;
-    last_loop_check=2; // last leg checked for loop
-    last_reduce=0;     // last leg checked for reduce
-
-    last_point_time=0; // definitely less than current millis()
-    last_big_reduce=0;
-    last_raw_point=0;   
-        
-    max_alt=0;
-
-
     
 DBG_PRINT("start ");
     recording=true;    
     return true;
 }
 
+// stops recording and simplifies last portion of points if any
 void AP_WayBack::stop(){
-    recording=false;
+    recording=false; 
+
     
     if(num_points) num_points -= 1; // skip the last point - current coordinates
 
@@ -230,8 +220,8 @@ void AP_WayBack::push_point(Vector3f p){
         _write_ptr=old_wp; // not overwrite, just skip last point
     }
             
-#if CONFIG_HAL_BOARD == HAL_BOARD_REVOMINI
-    REVOMINIScheduler::task_resume(_task); // resume task because there is new point
+#if CONFIG_HAL_BOARD == HAL_BOARD_F4LIGHT
+    Scheduler::task_resume(_task); // resume task because there is new point
 #endif
 
 }
@@ -278,7 +268,7 @@ bool AP_WayBack::get_point(float &x, float &y, float &z) {
 void AP_WayBack::tick(void)
 { 
 
-    if(points==NULL) return;
+    if(points==NULL) return; // recording still not started
 
 
 #if defined(WAYBACK_DEBUG)
@@ -287,7 +277,7 @@ void AP_WayBack::tick(void)
 
     if(recording){
 
-// here we should to get a point from queue
+// here we should to get all points from queue
         while(_read_ptr != _write_ptr) { // there are new points
             Vector3f p = _queue[_read_ptr++];
             if(_read_ptr >= POINTS_QUEUE_LEN) { 
@@ -352,8 +342,7 @@ void AP_WayBack::add_point(float x, float y){
     uint16_t p0;       // leg begin
     uint16_t p1;       // leg end
 
-//    uint16_t last_point = 0;
-    uint32_t start_t=REVOMINIScheduler::_micros();
+    uint32_t start_t=Scheduler::_micros();
 
     if(dist(x,y,points[num_points-1]) > _epsilon) { // we can add a point
 
@@ -464,7 +453,7 @@ again:
         squizze();      // remove bad points
     }
 
-    uint32_t dt = REVOMINIScheduler::_micros() - start_t;
+    uint32_t dt = Scheduler::_micros() - start_t;
     if(dt>1) { // to exclude noice
         DBG_PRINTF("point process time=%ld\n",dt);  
     }

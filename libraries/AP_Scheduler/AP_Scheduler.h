@@ -217,12 +217,9 @@ private:
     // performance counters
     AP_HAL::Util::perf_counter_t *_perf_counters;
 
-<<<<<<< HEAD
     // bitmask bit which indicates if we should log PERF message to dataflash
     uint32_t _log_performance_bit;
-=======
 #ifdef DEBUG_LOOP_TIME
     volatile uint32_t times[MAX_TASKS];
 #endif
->>>>>>> ArduCopter loop at 1KHz!
 };

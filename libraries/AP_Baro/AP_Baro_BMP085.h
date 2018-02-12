@@ -19,10 +19,6 @@ public:
     void update();
     
     static AP_Baro_Backend *probe(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> dev);
-    
-
-    static AP_Baro_Backend *probe(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> dev);
-
 
 private:
     bool _init();
@@ -63,6 +59,5 @@ private:
 
     uint8_t _vers;
     uint8_t _type;
-    
-    float _mean_pressure;    
+    float _mean_pressure;
 };

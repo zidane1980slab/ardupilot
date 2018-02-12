@@ -155,11 +155,6 @@ bool AP_Compass_MAG3110::_hardware_init()
     ack = _dev->write_register(MAG3110_MAG_REG_CTRL_REG2, 0xA0); // AUTO_MRST_EN + RAW
     if (!ack) goto exit;
 
-<<<<<<< HEAD
-=======
-//    hal.scheduler->delay(10);
-
->>>>>>> * renamed board *_MP32V1F4 to *_Revolution to simplify things
     ret = true;
 
     _dev->set_retries(3);
@@ -211,12 +206,8 @@ void AP_Compass_MAG3110::_update()
 
 
     bool ret=true;
-<<<<<<< HEAD
 
 #if MAG3110_ENABLE_LEN_FILTER
-=======
-    
->>>>>>> * renamed board *_MP32V1F4 to *_Revolution to simplify things
     float len = raw_field.length();
     if(is_zero(compass_len)) {
         compass_len=len;
@@ -233,10 +224,7 @@ void AP_Compass_MAG3110::_update()
             compass_len = compass_len * (1-FILTER_KOEF) + len*FILTER_KOEF; // complimentary filter 1/10 on good samples
         }
     }
-<<<<<<< HEAD
 #endif
-=======
->>>>>>> * renamed board *_MP32V1F4 to *_Revolution to simplify things
     
     if(ret) {
 
@@ -293,10 +281,7 @@ void AP_Compass_MAG3110::read()
 
     publish_filtered_field(field, _compass_instance);
 }
-<<<<<<< HEAD
-=======
 
-<<<<<<< HEAD
 /*
 bool AP_Compass_MAG3110::_mag_set_samplerate(uint16_t frequency)
 {

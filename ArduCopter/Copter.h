@@ -156,12 +156,14 @@
  # include <AP_Winch/AP_Winch.h>
 #endif
 
-#include <AP_Param_Helper/AP_Param_Helper.h>
-
-#if USE_WAYBACK == ENABLED && 0
-#include <AP_WayBack/AP_WayBack.h>
+#if TOY_MODE_ENABLED == ENABLED
+#include "toy_mode.h"
 #endif
 
+#if WINCH_ENABLED == ENABLED
+#include <AP_WheelEncoder/AP_WheelEncoder.h>
+#include <AP_Winch/AP_Winch.h>
+#endif
 
 // Local modules
 #include "Parameters.h"
@@ -602,10 +604,6 @@ private:
 #endif
 
     AP_Param_Helper param_helper;
-
-#if USE_WAYBACK == ENABLED && 0
-    AP_WayBack way_back;
-#endif
 
     // Top-level logic
     // setup the var_info table
