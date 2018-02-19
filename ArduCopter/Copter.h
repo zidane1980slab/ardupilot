@@ -603,8 +603,6 @@ private:
     uint32_t visual_odom_last_update_ms;
 #endif
 
-    AP_Param_Helper param_helper;
-
     // Top-level logic
     // setup the var_info table
     AP_Param param_loader;
