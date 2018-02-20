@@ -353,19 +353,6 @@ void AP_InertialSensor_Revo::_ioc(){ // io completion ISR, data already in its p
 */ 
         Scheduler::task_resume(task_handle); // resume task instead of using period. 
     }
-
-    //_dev->register_completion_callback(NULL); 
-// we should release the bus semaphore if we use them 
-//    _dev->get_semaphore()->give();            // release
-
-
-    if(REVOMINIScheduler::get_current_task() != (void *)task_handle) {
-/*
-        REVOMINIScheduler::set_task_active(task_handle); // resume task instead of using period. 
-        REVOMINIScheduler::context_switch_isr(); // and reschedule tasks after interrupt
-*/ 
-        REVOMINIScheduler::task_resume(task_handle); // resume task instead of using period. 
-    }
 }
 
 /*
@@ -584,6 +571,13 @@ void AP_InertialSensor_Revo::_read_fifo()
         count++;
     }
     now = Scheduler::_micros();
+    last_sample=now;
+
+#ifdef MPU_DEBUG_LOG
+    if(count==1) {
+        mpu_log_ptr = old_log_ptr;
+    }
+#endif
 #ifdef MPU_DEBUG
     dt= now - t;// time from entry
     REVOMINIScheduler::MPU_stats(count,dt);

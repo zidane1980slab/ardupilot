@@ -1,5 +1,3 @@
-#pragma GCC optimize("O2")
-
 #include <AP_HAL/AP_HAL.h>
 #include "AP_InertialSensor.h"
 #include "AP_InertialSensor_Backend.h"
@@ -9,6 +7,7 @@
 #include <stdio.h>
 #endif
 
+#define SENSOR_RATE_DEBUG 0
 
 const extern AP_HAL::HAL& hal;
 
@@ -398,7 +397,6 @@ void AP_InertialSensor_Backend::_publish_temperature(uint8_t instance, float tem
  */
 void AP_InertialSensor_Backend::update_gyro(uint8_t instance)
 {    
-
     if (!_sem->take(HAL_SEMAPHORE_BLOCK_FOREVER)) {
         return;
     }
@@ -438,22 +436,6 @@ void AP_InertialSensor_Backend::update_accel(uint8_t instance)
     }
 
     _sem->give();
-}
-
-DataFlash_Class *AP_InertialSensor_Backend::get_dataflash() const
-{
-    DataFlash_Class *instance = DataFlash_Class::instance();
-    if (instance == nullptr) {
-        return nullptr;
-    }
-    if (_imu._log_raw_bit == (uint32_t)-1) {
-        // tracker does not set a bit
-        return nullptr;
-    }
-    if (!instance->should_log(_imu._log_raw_bit)) {
-        return nullptr;
-    }
-    return instance;
 }
 
 bool AP_InertialSensor_Backend::should_log_imu_raw() const

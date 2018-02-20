@@ -2,7 +2,6 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
-#include <strings.h>
 #include "AP_HAL_Namespace.h"
 #include "AP_HAL_Boards.h"
 

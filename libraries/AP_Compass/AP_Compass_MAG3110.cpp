@@ -61,6 +61,7 @@ RUS:
 #define MAG3110_ENABLE_LEN_FILTER 0
 #endif
 
+
 // Registers
 #define MAG3110_MAG_REG_STATUS       0x00
 #define MAG3110_MAG_REG_HXL          0x01
@@ -281,35 +282,3 @@ void AP_Compass_MAG3110::read()
 
     publish_filtered_field(field, _compass_instance);
 }
-
-/*
-bool AP_Compass_MAG3110::_mag_set_samplerate(uint16_t frequency)
-{
-    uint8_t setbits = 0;
-    uint8_t clearbits = REG5_RATE_BITS_M;
-
-    if (frequency == 0) {
-        frequency = 100;
-    }
-
-    if (frequency <= 25) {
-        setbits |= REG5_RATE_25HZ_M;
-        _mag_samplerate = 25;
-    } else if (frequency <= 50) {
-        setbits |= REG5_RATE_50HZ_M;
-        _mag_samplerate = 50;
-    } else if (frequency <= 100) {
-        setbits |= REG5_RATE_100HZ_M;
-        _mag_samplerate = 100;
-    } else {
-        return false;
-    }
-
-    _register_modify(ADDR_CTRL_REG5, clearbits, setbits);
-
-    return true;
-}
-*/
->>>>>>> * renamed board *_MP32V1F4 to *_Revolution to simplify things
-=======
->>>>>>> * 4way-if adjusted to version 107

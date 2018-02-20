@@ -11,9 +11,8 @@
 #include <AP_HAL_F4Light/GPIO.h>
 
 
-#define DF_PAGE_SIZE 256L
 // flash size
-#define DF_NUM_PAGES BOARD_DATAFLASH_PAGES 
+#define DF_PAGE_SIZE 256L
 
 #define DF_RESET BOARD_DATAFLASH_CS_PIN // RESET (PB3)
 
@@ -39,9 +38,6 @@
 #define JEDEC_STATUS_TP              0x20
 #define JEDEC_STATUS_SEC             0x40
 #define JEDEC_STATUS_SRP0            0x80
-
-#define expect_memorytype            0x20
-#define expect_capacity              0x15
 
 
 using namespace F4Light;
@@ -88,6 +84,7 @@ private:
     bool cs_assert(); // Select device 
     void cs_release(); // Deselect device
 
+//    uint8_t spi_read(void) { uint8_t b;  _spi->transfer(NULL,0, &b, 1); return b; }
     inline void    spi_write(uint8_t b) {       _spi->transfer(&b,1, NULL, 0);  }
     inline void spi_write(int data) { spi_write((uint8_t)data); }
 
@@ -155,7 +152,7 @@ protected:
 public:
     DataFlash_Revo(DataFlash_Class &front, DFMessageWriter_DFLogStart *writer) :
         DataFlash_Backend(front, writer) { }
-    
+        
     void        Init() override;
     void        ReadManufacturerID();
     bool        CardInserted(void) const { return true; }

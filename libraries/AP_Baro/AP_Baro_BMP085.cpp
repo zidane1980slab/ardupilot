@@ -87,12 +87,6 @@ bool AP_Baro_BMP085::_init()
         return false;    // not BMP180
     }
 
-
-    _dev->read_registers(0xD1, &_vers, 1);
-
-    bool prom_ok=false;
-    _type=0;
-
     _dev->read_registers(0xD1, &_vers, 1);
 
     bool prom_ok=false;

@@ -146,6 +146,7 @@ private:
     // buffer for fifo read
     uint8_t *_fifo_buffer; 
 
+
     /*
       accumulators for fast sampling
       See description in _accumulate_fast_sampling()
@@ -166,6 +167,7 @@ private:
     uint32_t last_sample;
     
     Vector3f gyro_mean;
+
 
 //#define MPU_DEBUG_LOG
 

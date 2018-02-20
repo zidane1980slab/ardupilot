@@ -22,12 +22,12 @@ based on: Flymaple port by Mike McCauley
 
 #include <AP_HAL/AP_HAL.h>
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_REVOMINI
+#if CONFIG_HAL_BOARD == HAL_BOARD_F4LIGHT
 
 
-#include "AP_HAL_REVOMINI.h"
+#include "AP_HAL_F4Light.h"
 
-#include "AP_HAL_REVOMINI_Namespace.h"
+#include "AP_HAL_F4Light_Namespace.h"
 
 #include "AnalogIn.h"
 #include <adc.h>
@@ -41,9 +41,9 @@ based on: Flymaple port by Mike McCauley
 
 extern const AP_HAL::HAL& hal;
 
-using namespace REVOMINI;
+using namespace F4Light;
 
-REVOMINIAnalogSource::REVOMINIAnalogSource(uint8_t pin) :
+AnalogSource::AnalogSource(uint8_t pin) :
     _sum_count(0),
     _sum(0),
     _latest(0),
@@ -62,12 +62,12 @@ REVOMINIAnalogSource::REVOMINIAnalogSource(uint8_t pin) :
 /*
   return voltage from 0.0 to 3.3V, scaled to Vcc
  */
-float REVOMINIAnalogSource::voltage_average(void)
+float AnalogSource::voltage_average(void)
 {
     return voltage_average_ratiometric();
 }
 
-float REVOMINIAnalogSource::voltage_latest(void)
+float AnalogSource::voltage_latest(void)
 {
     return read_latest() * (3.3f / 4096.0f);
 }
@@ -77,13 +77,13 @@ float REVOMINIAnalogSource::voltage_latest(void)
   means the result is really a pseudo-voltage, that assumes the supply
   voltage is exactly 3.3V.
  */
-float REVOMINIAnalogSource::voltage_average_ratiometric(void)
+float AnalogSource::voltage_average_ratiometric(void)
 {
     float v = read_average();
     return v * (3.3f / 4096.0f);
 }
 
-void REVOMINIAnalogSource::set_pin(uint8_t pin) {
+void AnalogSource::set_pin(uint8_t pin) {
     if (pin != _pin) {
 	noInterrupts();
 	_sum = 0;
@@ -94,11 +94,11 @@ void REVOMINIAnalogSource::set_pin(uint8_t pin) {
 	interrupts();
 
 	// ensure the pin is marked as an INPUT pin
-	if (pin != ANALOG_INPUT_NONE && pin != ANALOG_INPUT_REVOMINI_VCC && pin < BOARD_NR_GPIO_PINS) {
-            REVOMINIGPIO::_pinMode(pin, INPUT_ANALOG);
+	if (pin != ANALOG_INPUT_NONE && pin != ANALOG_INPUT_F4Light_VCC && pin < BOARD_NR_GPIO_PINS) {
+            GPIO::_pinMode(pin, INPUT_ANALOG);
 	}
 	
-	if (pin == ANALOG_INPUT_REVOMINI_VCC || (pin != ANALOG_INPUT_NONE &&  pin < BOARD_NR_GPIO_PINS)) {
+	if (pin == ANALOG_INPUT_F4Light_VCC || (pin != ANALOG_INPUT_NONE &&  pin < BOARD_NR_GPIO_PINS)) {
             const adc_dev *dev = _find_device();
 
             if(dev) {
@@ -112,7 +112,7 @@ void REVOMINIAnalogSource::set_pin(uint8_t pin) {
 
 
 /* read_average is called from the normal thread (not an interrupt). */
-float REVOMINIAnalogSource::_read_average()
+float AnalogSource::_read_average()
 {
 
     if (_sum_count == 0) {
@@ -129,7 +129,7 @@ float REVOMINIAnalogSource::_read_average()
 }
 
 
-void REVOMINIAnalogSource::setup_read() {
+void AnalogSource::setup_read() {
     if (_stop_pin != ANALOG_INPUT_NONE && _stop_pin < BOARD_NR_GPIO_PINS) {
 
         const stm32_pin_info &p = PIN_MAP[_stop_pin];
@@ -142,7 +142,7 @@ void REVOMINIAnalogSource::setup_read() {
     }
     const adc_dev *dev = _find_device();
 
-    if (_pin == ANALOG_INPUT_REVOMINI_VCC){
+    if (_pin == ANALOG_INPUT_F4Light_VCC){
 	adc_set_reg_seqlen(dev, 1);
 
 	  /* Enable Vrefint on Channel17 */
@@ -150,7 +150,7 @@ void REVOMINIAnalogSource::setup_read() {
 	adc_vref_enable();
 
 	  /* Wait until ADC + Temp sensor start */
-        REVOMINIScheduler::_delay_microseconds(10);
+        Scheduler::_delay_microseconds(10);
 
     } else if (_pin == ANALOG_INPUT_NONE) {
         // nothing to do
@@ -162,8 +162,8 @@ void REVOMINIAnalogSource::setup_read() {
     }
 }
 
-void REVOMINIAnalogSource::stop_read() {
-    if(_pin == ANALOG_INPUT_REVOMINI_VCC) {
+void AnalogSource::stop_read() {
+    if(_pin == ANALOG_INPUT_F4Light_VCC) {
 	adc_vref_disable();
     }
     if (_stop_pin != ANALOG_INPUT_NONE && _stop_pin < BOARD_NR_GPIO_PINS) {
@@ -175,7 +175,7 @@ void REVOMINIAnalogSource::stop_read() {
     }
 }
 
-bool REVOMINIAnalogSource::reading_settled()
+bool AnalogSource::reading_settled()
 {
     if (_settle_time_ms != 0 && (AP_HAL::millis() - _read_start_time_ms) < _settle_time_ms) {
         return false;
@@ -184,7 +184,7 @@ bool REVOMINIAnalogSource::reading_settled()
 }
 
 /* new_sample is called from another process */
-void REVOMINIAnalogSource::new_sample(uint16_t sample) {
+void AnalogSource::new_sample(uint16_t sample) {
     _latest = sample;
 
     EnterCriticalSection;
@@ -193,7 +193,7 @@ void REVOMINIAnalogSource::new_sample(uint16_t sample) {
 //#define MAX_SUM_COUNT 16 // a legacy of the painfull 8-bit past
 #define MAX_SUM_COUNT 64
 
-    if (_sum_count >= MAX_SUM_COUNT) { // REVOMINI has a 12 bit ADC, so can only sum 16 in a uint16_t - and a 16*65536 in uint32_t
+    if (_sum_count >= MAX_SUM_COUNT) { // F4Light has a 12 bit ADC, so can only sum 16 in a uint16_t - and a 16*65536 in uint32_t
         _sum /= 2;
         _sum_count = MAX_SUM_COUNT/2;
     } else {

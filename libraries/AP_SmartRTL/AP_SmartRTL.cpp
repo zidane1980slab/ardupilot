@@ -256,11 +256,15 @@ void AP_SmartRTL::set_home(bool position_ok, const Vector3f& current_pos)
 void AP_SmartRTL::update(bool position_ok, bool save_position)
 {
     // try to save home if not already saved
+
+#ifdef USE_WAYBACK
+    if (position_ok) {
+        set_home(true);
+    }
+#else
     if (position_ok && !_home_saved) {
         set_home(true);
     }
-
-#ifndef USE_WAYBACK
     if (!_active || !save_position) {
         return;
     }

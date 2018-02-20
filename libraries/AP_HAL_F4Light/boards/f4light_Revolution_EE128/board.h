@@ -146,10 +146,10 @@
 #define BOARD_STORAGE_SIZE              8192 // 4096 // EEPROM size
 
 #define BOARD_DATAFLASH_NAME            "dataflash"
-#define BOARD_DATAFLASH_PAGES           0x2000
-#define BOARD_DATAFLASH_ERASE_SIZE (65536)// in bytes
+#define BOARD_DATAFLASH_PAGES           0x10000
+#define BOARD_DATAFLASH_ERASE_SIZE      (4096)// in bytes
 
-#if 0// use it as FAT and share it via USB
+#if 1// use it as FAT and share it via USB
 #define BOARD_DATAFLASH_FATFS
 #define USB_MASSSTORAGE
 #define HAL_BOARD_LOG_DIRECTORY "0:/"

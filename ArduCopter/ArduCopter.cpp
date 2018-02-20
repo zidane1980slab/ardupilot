@@ -191,32 +191,7 @@ void Copter::setup()
     init_ardupilot();
 
     // initialise the main loop scheduler
-<<<<<<< HEAD
     scheduler.init(&scheduler_tasks[0], ARRAY_SIZE(scheduler_tasks), MASK_LOG_PM);
-=======
-    scheduler.init(&scheduler_tasks[0], ARRAY_SIZE(scheduler_tasks));
-
-    // setup initial performance counters
-    perf_info.reset(scheduler.get_loop_rate_hz());
-    fast_loopTimer = AP_HAL::micros();
-}
-
-void Copter::perf_update(void)
-{
-    if (should_log(MASK_LOG_PM))
-        Log_Write_Performance();
-    if (scheduler.debug()) {
-        gcs().send_text(MAV_SEVERITY_WARNING, "PERF: %u/%u max=%lu min=%lu avg=%lu sd=%lu",
-                          (unsigned)perf_info.get_num_long_running(),
-                          (unsigned)perf_info.get_num_loops(),
-                          (unsigned long)perf_info.get_max_time(),
-                          (unsigned long)perf_info.get_min_time(),
-                          (unsigned long)perf_info.get_avg_time(),
-                          (unsigned long)perf_info.get_stddev_time());
-    }
-    perf_info.reset(scheduler.get_loop_rate_hz());
-    pmTest1 = 0;
->>>>>>> changes to use HAL from upstream
 }
 
 void Copter::loop()

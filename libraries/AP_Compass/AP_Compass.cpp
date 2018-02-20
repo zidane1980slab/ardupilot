@@ -936,8 +936,7 @@ void Compass::_detect_backends(void)
 
 #ifdef BOARD_I2C_BUS_EXT
     //external i2c bus
-    ADD_BACKEND(AP_Compass_QMC5883L::probe(*this, hal.i2c_mgr->get_device(BOARD_I2C_BUS_EXT, HAL_COMPASS_QMC5883L_I2C_ADDR),
-            								true,ROTATION_ROLL_180),
+    ADD_BACKEND(DRIVER_QMC5883, AP_Compass_QMC5883L::probe(*this, hal.i2c_mgr->get_device(BOARD_I2C_BUS_EXT, HAL_COMPASS_QMC5883L_I2C_ADDR), ROTATION_NONE),
     			AP_Compass_QMC5883L::name, true);
 #endif
 

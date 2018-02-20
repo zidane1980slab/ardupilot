@@ -146,7 +146,6 @@ public:
     uint8_t get_buzz_pin() const  { return _buzzer_pin; }
 
 private:
-    uint8_t get_buzz_pin() const  { return _buzzer_pin; }
 
     static AP_Notify *_instance;
 
