@@ -1,5 +1,5 @@
 git checkout  master
-git pull git://github.com/ArduPilot/ardupilot.git master
+git pull --squash git://github.com/ArduPilot/ardupilot.git master
 
 # Step 2: Merge the changes and update on GitHub.
 
