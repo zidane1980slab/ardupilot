@@ -33,10 +33,8 @@ void Plane::init_ardupilot()
     //
     load_parameters();
 
-#if STATS_ENABLED == ENABLED
     // initialise stats module
     g2.stats.init();
-#endif
 
 #if HIL_SUPPORT
     if (g.hil_mode == 1) {
@@ -119,6 +117,9 @@ void Plane::init_ardupilot()
     frsky_telemetry.init(serial_manager, fwver.fw_string,
                          MAV_TYPE_FIXED_WING);
 #endif
+#if DEVO_TELEM_ENABLED == ENABLED
+    devo_telemetry.init(serial_manager);
+#endif
 
 #if LOGGING_ENABLED == ENABLED
     log_init();
@@ -200,11 +201,6 @@ void Plane::init_ardupilot()
     if (optflow.enabled()) {
         optflow.init();
     }
-#endif
-
-// init cargo gripper
-#if GRIPPER_ENABLED == ENABLED
-    g2.gripper.init();
 #endif
 
     // disable safety if requested
@@ -300,6 +296,9 @@ void Plane::set_mode(enum FlightMode mode, mode_reason_t reason)
 
 #if FRSKY_TELEM_ENABLED == ENABLED
     frsky_telemetry.update_control_mode(control_mode);
+#endif
+#if DEVO_TELEM_ENABLED == ENABLED
+    devo_telemetry.update_control_mode(control_mode);
 #endif
 #if CAMERA == ENABLED
     camera.set_is_auto_mode(control_mode == AUTO);
@@ -570,6 +569,12 @@ void Plane::startup_INS_ground(void)
             hal.scheduler->delay(1000);
         }
     }
+#endif
+#if DEVO_TELEM_ENABLED == ENABLED
+void Plane::devo_telemetry_send(void)
+{
+    devo_telemetry.send_frames((uint8_t)control_mode);
+}
 #endif
 
     if (ins.gyro_calibration_timing() != AP_InertialSensor::GYRO_CAL_NEVER) {

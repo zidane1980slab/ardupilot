@@ -31,7 +31,6 @@
 // # define BUZZER_PIN     -1 // pin undefined on other boards
  #endif
 #endif
-
 #define BUZZER_ARMING_BUZZ_MS   3000    // arming buzz length in milliseconds (i.e. 3 seconds)
 
 #include "NotifyDevice.h"
