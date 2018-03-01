@@ -75,3 +75,5 @@
  #define USE_WAYBACK_ENABLE ENABLED
 
  #define LOGGING_ENABLED ENABLED
+
+#define DISABLE_STATS_UPDATE 1 // to reduce flash degradation

@@ -87,7 +87,9 @@ const AP_Scheduler::Task Rover::scheduler_tasks[] = {
     SCHED_TASK_CLASS(AP_InertialSensor,   &rover.ins,              periodic,       50,   50),
     SCHED_TASK_CLASS(AP_Scheduler,        &rover.scheduler,        update_logging, 0.1,  75),
     SCHED_TASK_CLASS(AP_Button,           &rover.button,           update,          5,  100),
+#ifndef DISABLE_STATS_UPDATE
     SCHED_TASK(stats_update,            1,    100),
+#endif
     SCHED_TASK(crash_check,            10,   1000),
     SCHED_TASK(cruise_learn_update,    50,     50),
 #if ADVANCED_FAILSAFE == ENABLED

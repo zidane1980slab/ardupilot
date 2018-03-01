@@ -83,7 +83,9 @@ const AP_Scheduler::Task Plane::scheduler_tasks[] = {
     SCHED_TASK(ins_periodic,           50,     50),
     SCHED_TASK(avoidance_adsb_update,  10,    100),
     SCHED_TASK(button_update,           5,    100),
+#ifndef DISABLE_STATS_UPDATE
     SCHED_TASK(stats_update,            1,    100),
+#endif
 };
 
 /*

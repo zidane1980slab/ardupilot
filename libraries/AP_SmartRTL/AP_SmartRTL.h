@@ -49,7 +49,7 @@ public:
     inline bool is_active() const { return wb.is_active(); }
 #else
     // return true if smart_rtl is usable (it may become unusable if the user took off without GPS lock or the path became too long)
-    bool is_active() const { return _active; }
+    inline bool is_active() const { return _active; }
 #endif
 
     // returns number of points on the path

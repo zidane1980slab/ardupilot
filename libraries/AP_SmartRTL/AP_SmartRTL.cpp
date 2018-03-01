@@ -85,9 +85,11 @@ const AP_Param::GroupInfo AP_SmartRTL::var_info[] = {
      As the result, maximal point count is limited to 500 points.
      
      Ap_WayBack library uses only 8 bytes per point, and checks only new point and the last leg which it creates so its complexity is O(n) in worst case,
-     As the result its work checked with 4000 points and time never exceeds 100ms (in low-priority thread).
-     Also, no error can cause abort of RTL - even an unsuccessful attempt is much better than to immediately surrender.
+     As the result its work checked with 4000 points and time never exceeds 100ms (in low-priority thread). The only exception - if memory overflows and
+     library should increase EPS and do a full simplification to free some memory, but this case is absilutely unreal because
+     track Vladivostok-Kaliningrad by the roads with 10m EPS requires ~3800 points.
      
+     Also, no error can cause abort of RTL - even an unsuccessful attempt is much better than to immediately surrender.
 
 */
 
@@ -211,6 +213,7 @@ void AP_SmartRTL::set_home(bool position_ok)
 #ifdef USE_WAYBACK
 
     bool ret = wb.start(); // restart
+    (void)ret;
 
     Vector3f current_pos;
     position_ok &= _ahrs.get_relative_position_NED_origin(current_pos);
@@ -315,7 +318,7 @@ bool AP_SmartRTL::request_thorough_cleanup(ThoroughCleanupType clean_type)
 {
 
 #ifdef USE_WAYBACK      
-    wb.stop(); 
+    wb.stop(); // stop recording
     return true;  // we always have already simplified path
 #else
     // this should never happen but just in case
@@ -345,7 +348,10 @@ bool AP_SmartRTL::request_thorough_cleanup(ThoroughCleanupType clean_type)
 // cancel request for thorough cleanup
 void AP_SmartRTL::cancel_request_for_thorough_cleanup()
 {
-#ifndef USE_WAYBACK      
+#ifdef USE_WAYBACK      
+    bool ret = wb.start(); // restart because mode changed to any another
+    (void)ret;
+#else
     _thorough_clean_request_ms = 0;
 #endif
 }

@@ -2,7 +2,8 @@
 
  this library collects points of drone position, records them in memory and eliminates 
  unnecessary data - redundant points and loops, so it always knows 
- the shortest way to home via visited points.
+ the shortest way to home via visited points. The loops are reduced ASAP so this way is 
+ not "true the best" from mathematic's view, but this approach greatly simplifies code.
  
  Copyright night_ghost@ykoctpa.ru 2017
   
@@ -29,6 +30,9 @@
 #define SIMPLIFY_MOVE_BACK          2  // move N points back
 #define MIN_SIMPLIFY_POINTS         8  // this number should be adjusted upto value which not cause processing time to exceed 1s at full load
 #define RAW_POINTS                  3
+
+#define WAYBACK_PRIORITY 116 // speed 1/16 of main task
+
 
 #ifdef WAYBACK_DEBUG
   #define DBG_PRINTLN(x)     { hal.uartA->print("#"); hal.uartA->print(x); hal.uartA->println();  }
