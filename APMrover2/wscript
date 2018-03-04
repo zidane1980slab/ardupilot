@@ -26,6 +26,7 @@ def build(bld):
             'AP_Proximity',
             'AC_Avoidance',
             'AC_AttitudeControl',
+            'AP_Devo_Telem'
         ],
     )
 

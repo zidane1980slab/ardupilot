@@ -170,3 +170,6 @@
 #ifndef STATS_ENABLED
  # define STATS_ENABLED ENABLED
 #endif
+#ifndef DEVO_TELEM_ENABLED
+ #define DEVO_TELEM_ENABLED ENABLED
+#endif

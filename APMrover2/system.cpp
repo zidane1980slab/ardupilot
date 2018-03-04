@@ -82,6 +82,9 @@ void Rover::init_ardupilot()
 #if FRSKY_TELEM_ENABLED == ENABLED
     frsky_telemetry.init(serial_manager, fwver.fw_string, MAV_TYPE_GROUND_ROVER);
 #endif
+#if DEVO_TELEM_ENABLED == ENABLED
+    devo_telemetry.init(serial_manager);
+#endif
 
 #if LOGGING_ENABLED == ENABLED
     log_init();
@@ -236,6 +239,10 @@ bool Rover::set_mode(Mode &new_mode, mode_reason_t reason)
 #if FRSKY_TELEM_ENABLED == ENABLED
     frsky_telemetry.update_control_mode(control_mode->mode_number());
 #endif
+#if DEVO_TELEM_ENABLED == ENABLED
+    devo_telemetry.update_control_mode(control_mode->mode_number());
+#endif
+
 #if CAMERA == ENABLED
     camera.set_is_auto_mode(control_mode->mode_number() == AUTO);
 #endif
