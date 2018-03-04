@@ -37,6 +37,7 @@
 //#define MODE_RTL_ENABLED DISABLED                 // disable rtl mode support
 //#define MODE_SMARTRTL_ENABLED DISABLED            // disable smartrtl mode support
 //#define MODE_SPORT_ENABLED DISABLED               // disable sport mode support
+//#define DEVO_TELEM_ENABLED DISABLED
 
 
 // features below are disabled by default on all boards
