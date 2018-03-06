@@ -75,6 +75,7 @@ private:
     AP_HAL::UARTDriver *_port;              // UART used to send data to receiver
     bool _initialised_uart;                 // true when we have detected the protocol and UART has been initialised
     uint32_t _last_frame_ms;
+    bool on_gps_uart;
 
 };
 #endif

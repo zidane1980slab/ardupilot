@@ -104,6 +104,7 @@ public:
         SerialProtocol_Volz = 14,                    // Volz servo protocol
         SerialProtocol_Sbus1 = 15,
         SerialProtocol_Devo_Telem = 16,
+        SerialProtocol_GPS_Devo_Telem = 17,
     };
 
     // get singleton instance
