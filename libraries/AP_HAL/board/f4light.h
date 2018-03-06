@@ -77,4 +77,11 @@
 
  #define LOGGING_ENABLED ENABLED
 
+ // exclude some useless modes 
+ #define MODE_SPORT_ENABLED DISABLE
+ #define MODE_DRIFT_ENABLED DISABLE
+ #define MODE_BRAKE_ENABLED DISABLE
+ #define MODE_GUIDED_NOGPS_ENABLED DISABLE
+ 
+ 
 #define DISABLE_STATS_UPDATE 1 // to reduce flash degradation
