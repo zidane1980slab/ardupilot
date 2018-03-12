@@ -41,6 +41,10 @@ extern AP_HAL::HAL& hal;
 #define AP_COMPASS_OFFSETS_MAX_DEFAULT 850
 #endif
 
+#ifndef HAL_COMPASS_FILTER_DEFAULT
+ #define HAL_COMPASS_FILTER_DEFAULT 0 // turned off by default
+#endif
+
 const AP_Param::GroupInfo Compass::var_info[] = {
     // index 0 was used for the old orientation matrix
 
@@ -440,6 +444,15 @@ const AP_Param::GroupInfo Compass::var_info[] = {
     // @Group: PMOT
     // @Path: Compass_PerMotor.cpp
     AP_SUBGROUPINFO(_per_motor, "PMOT", 35, Compass, Compass_PerMotor),
+    
+    
+    // @Param: FILTER_RANGE
+    // @DisplayName: Range in which sample can vary beein good, in %
+    // @Description: Tunes bad sample filter, alluwing to set range (0 - filter is off)
+    // @Units: percents
+    // @Range: 0 100
+    // @Increment: 1
+    AP_GROUPINFO("FILTER_RANGE", 36, Compass, _filtrer_range, HAL_COMPASS_FILTER_DEFAULT), // difference more than 20% from mean value
     
     AP_GROUPEND
 };

@@ -108,6 +108,9 @@ protected:
     // semaphore for access to shared frontend data
     AP_HAL::Semaphore *_sem;
 
+    bool field_ok(float l);
+    
 private:
     void apply_corrections(Vector3f &mag, uint8_t i);
+    float _mean_field_length;
 };

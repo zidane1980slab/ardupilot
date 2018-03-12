@@ -51,6 +51,9 @@
 
 #define INTERNAL_TEMPERATURE_CLAMP 35.0f
 
+#ifndef HAL_BARO_FILTER_DEFAULT
+ #define HAL_BARO_FILTER_DEFAULT 0 // turned off by default
+#endif
 
 // for baro drivt compensation
 #define GPS_LOOP_FREQ     50.f                  // GPS loop frequency in Hz
@@ -168,6 +171,14 @@ const AP_Param::GroupInfo AP_Baro::var_info[] = {
     // @Range: 10 600
     // @Increment: 1
     AP_GROUPINFO("ADJ_DELAY", 16, AP_Baro, _adj_delay, ADJ_DELAY_DEFAULT),
+
+    // @Param: FILTER_RANGE
+    // @DisplayName: Range in which sample can vary beein good, in %
+    // @Description: Tunes bad sample filter, allowing to set range (0 - filter is off)
+    // @Units: percents
+    // @Range: 0 100
+    // @Increment: 1
+    AP_GROUPINFO("FILTER_RANGE", 16, AP_Baro, _filtrer_range, HAL_BARO_FILTER_DEFAULT),
 
 
     AP_GROUPEND

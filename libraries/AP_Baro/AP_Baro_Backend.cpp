@@ -1,6 +1,7 @@
 #pragma GCC optimize("O2")
 
 #include "AP_Baro_Backend.h"
+#include <stdio.h>
 
 extern const AP_HAL::HAL& hal;
 
@@ -57,4 +58,28 @@ void AP_Baro_Backend::_copy_to_frontend(uint8_t instance, float pressure, float 
     _frontend.sensors[instance].pressure = pressure;
     _frontend.sensors[instance].temperature = temperature;
     _frontend.sensors[instance].last_update_ms = now;
+}
+
+#define FILTER_KOEF 0.1
+
+bool AP_Baro_Backend::pressure_ok(float press) {
+    bool ret=true;
+    
+    if(isinf(press) || isnan(press)) return false;
+    
+    if(is_zero(_mean_pressure)){
+        _mean_pressure = press;
+    } else {
+        float range = _frontend.get_filtrer_range();
+        float d = abs(_mean_pressure-press)/(_mean_pressure+press);
+        float k = FILTER_KOEF;
+
+        if(!is_zero(range) && d*200 > range) { // check the difference from mean value outside allowed range
+            printf("\nBaro pressure error: mean %f got %f\n", _mean_pressure, press );
+            ret= false;
+            k /= (d*10); // 2.5 and more, so one bad sample never change mean more than 4%
+        }
+        _mean_pressure = _mean_pressure * (1-k) + press*k; // complimentary filter 1/k
+    }
+    return ret;
 }

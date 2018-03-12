@@ -288,24 +288,7 @@ void AP_Compass_HMC5843::_timer()
     // correct raw_field for known errors
     correct_field(raw_field, _compass_instance);
 
-    bool ret=true;    
-    float len = raw_field.length();
-    if(is_zero(compass_len)) {
-        compass_len=len;
-    } else {
-#define FILTER_KOEF 0.1
-
-        float d = abs(compass_len-len)/(compass_len+len); 
-        if(d*100 > 25) { // difference more than 50% from mean value
-            printf("\ncompass len error: mean %f got %f\n", compass_len, len );
-            ret= false; 
-            float k = FILTER_KOEF / (d*10); // 2.5 and more, so one bad sample never change mean more than 4%
-            compass_len = compass_len * (1-k) + len*k; // complimentary filter 1/k on bad samples
-        } else {
-            compass_len = compass_len * (1-FILTER_KOEF) + len*FILTER_KOEF; // complimentary filter 1/10 on good samples
-        }
-    }
-    if(ret) {
+    if(field_ok(raw_field.length())) {
         if (!_sem->take(HAL_SEMAPHORE_BLOCK_FOREVER)) {
             return; 
         }

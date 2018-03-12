@@ -328,27 +328,7 @@ void AP_Baro_MS56XX::_timer(void)
             _update_and_wrap_accumulator(&_accum.s_D2, adc_val,
                                          &_accum.d2_count, 32);
         } else {
-            float press = adc_val;
-            
-            bool ret = true;
-            
-            if(is_zero(_mean_pressure)) {
-                _mean_pressure=press;
-            } else {
-#define FILTER_KOEF 0.1
-
-                float d = abs(_mean_pressure-press)/(_mean_pressure+press);
-                if(d*100 > 25) { // difference more than 50% from mean value
-                    printf("\nBaro value error: mean %f got %f\n", _mean_pressure, press );
-                    ret= false;
-                    float k = FILTER_KOEF / (d*10); // 2.5 and more, so one bad sample never change mean more than 4%
-                    _mean_pressure = _mean_pressure * (1-k) + press*k; // complimentary filter 1/k on bad samples
-                } else {
-                    _mean_pressure = _mean_pressure * (1-FILTER_KOEF) + press*FILTER_KOEF; // complimentary filter 1/10 on good samples
-                }
-            }
-                
-            if(ret) {
+            if(pressure_ok(adc_val)) {
     
                 _update_and_wrap_accumulator(&_accum.s_D1, adc_val,
                                              &_accum.d1_count, 128);

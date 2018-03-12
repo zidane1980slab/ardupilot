@@ -22,6 +22,7 @@ public:
 
     void backend_update(uint8_t instance);
 
+    bool pressure_ok(float p);
 protected:
     // reference to frontend object
     AP_Baro &_frontend;
@@ -33,4 +34,6 @@ protected:
 
     virtual void update_healthy_flag(uint8_t instance);
 
+    // mean pressure for range filter
+    float _mean_pressure; 
 };
