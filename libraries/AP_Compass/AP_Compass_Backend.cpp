@@ -150,7 +150,7 @@ void AP_Compass_Backend::set_rotation(uint8_t instance, enum Rotation rotation)
 }
 
 #define FILTER_KOEF 0.1
-#pragma GCC optimize("O2")
+#pragma GCC optimize("O2")// checked that this don't increases size
 
 bool AP_Compass_Backend::field_ok(float length) {
     if(isinf(length) || isnan(length)) return false;

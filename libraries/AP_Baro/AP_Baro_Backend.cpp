@@ -71,7 +71,7 @@ bool AP_Baro_Backend::pressure_ok(float press) {
     if(is_zero(_mean_pressure)){
         _mean_pressure = press;
     } else {
-        float range = _frontend.get_filtrer_range();
+        float range = _frontend.get_filter_range();
         float d = abs(_mean_pressure-press)/(_mean_pressure+press);
         float k = FILTER_KOEF;
 

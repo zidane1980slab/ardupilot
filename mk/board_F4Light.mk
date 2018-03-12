@@ -86,7 +86,7 @@ include $(BOARDS_PATH)/$(BOARD)/target-config.mk
 
 EXTRAFLAGS += -DHAVE_STD_NULLPTR_T=0  -DHAVE_BYTESWAP_H=0
 EXTRAFLAGS += $(SKETCHLIBINCLUDES) -DARDUPILOT_BUILD -DTESTS_MATHLIB_DISABLE  -DSKETCH_MAIN=ArduPilot_main
-GITFLAGS   := -DGIT_VERSION="\"$(GIT_VERSION) $(shell date --rfc-3339=seconds)\""
+GITFLAGS   := -DGIT_VERSION="\"$(GIT_VERSION) $(shell date --rfc-3339=date)\""
 
 
 #-Werror
