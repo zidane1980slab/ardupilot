@@ -61,6 +61,7 @@ void AP_Baro_Backend::_copy_to_frontend(uint8_t instance, float pressure, float 
 }
 
 #define FILTER_KOEF 0.1
+#pragma GCC optimize("O2")// checked that this don't increases size
 
 bool AP_Baro_Backend::pressure_ok(float press) {
     bool ret=true;

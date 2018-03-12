@@ -1,7 +1,5 @@
 #include <AP_HAL/AP_HAL.h>
 
-#pragma GCC optimize("O3")
-
 #include "AP_Compass.h"
 #include "AP_Compass_Backend.h"
 #include <stdio.h>
@@ -152,6 +150,7 @@ void AP_Compass_Backend::set_rotation(uint8_t instance, enum Rotation rotation)
 }
 
 #define FILTER_KOEF 0.1
+#pragma GCC optimize("O2")
 
 bool AP_Compass_Backend::field_ok(float length) {
     if(isinf(length) || isnan(length)) return false;

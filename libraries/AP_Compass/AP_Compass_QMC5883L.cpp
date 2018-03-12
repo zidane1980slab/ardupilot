@@ -220,6 +220,7 @@ void AP_Compass_QMC5883L::timer()
             _sem->give();
         }
     }
+    }
 }
 
 void AP_Compass_QMC5883L::read()

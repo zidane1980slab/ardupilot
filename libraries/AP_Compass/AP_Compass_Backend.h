@@ -109,8 +109,12 @@ protected:
     AP_HAL::Semaphore *_sem;
 
     bool field_ok(float l);
-    
+    uint32_t get_error_count() { return _error_count; }    
 private:
     void apply_corrections(Vector3f &mag, uint8_t i);
+    
+    // mean field length for range filter
     float _mean_field_length;
+    // number of dropped samples. Not used for now, but can be usable to choose more reliable sensor
+    uint32_t _error_count;
 };
