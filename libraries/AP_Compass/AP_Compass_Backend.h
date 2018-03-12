@@ -108,6 +108,15 @@ protected:
     // semaphore for access to shared frontend data
     AP_HAL::Semaphore *_sem;
 
+    //  Check that the baro valid by using a mean filter.
+    // If the value further that filtrer_range from mean value, it is rejected.
+    bool field_ok(float length);
+    uint32_t get_error_count() const { return _error_count; }
 private:
     void apply_corrections(Vector3f &mag, uint8_t i);
+    
+    // mean field length for range filter
+    float _mean_field_length;
+    // number of dropped samples. Not used for now, but can be usable to choose more reliable sensor
+    uint32_t _error_count;
 };
