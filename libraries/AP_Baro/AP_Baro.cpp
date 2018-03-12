@@ -172,13 +172,13 @@ const AP_Param::GroupInfo AP_Baro::var_info[] = {
     // @Increment: 1
     AP_GROUPINFO("ADJ_DELAY", 16, AP_Baro, _adj_delay, ADJ_DELAY_DEFAULT),
 
-    // @Param: FILTER_RANGE
-    // @DisplayName: Range in which sample can vary beein good, in %
+    // @Param: FLTR_RNG
+    // @DisplayName: Range in which sample can vary beeing good, in %
     // @Description: Tunes bad sample filter, allowing to set range (0 - filter is off)
     // @Units: percents
     // @Range: 0 100
     // @Increment: 1
-    AP_GROUPINFO("FILTER_RANGE", 16, AP_Baro, _filter_range, HAL_BARO_FILTER_DEFAULT),
+    AP_GROUPINFO("FLTR_RNG", 13, AP_Baro, _filter_range, HAL_BARO_FILTER_DEFAULT),
 
     AP_GROUPEND
 };

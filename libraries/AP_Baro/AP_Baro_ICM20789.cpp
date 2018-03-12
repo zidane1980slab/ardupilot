@@ -301,7 +301,7 @@ void AP_Baro_ICM20789::convert_data(uint32_t Praw, uint32_t Traw)
     // pressure involves a few more calculations
     float P = get_pressure(Praw, Traw);
 
-    if(pressure_ok(P)) {
+    if (pressure_ok(P)) {
         if (_sem->take(HAL_SEMAPHORE_BLOCK_FOREVER)) {
 #if BARO_ICM20789_DEBUG
             dd.Praw = Praw;
