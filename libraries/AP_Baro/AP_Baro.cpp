@@ -180,7 +180,6 @@ const AP_Param::GroupInfo AP_Baro::var_info[] = {
     // @Increment: 1
     AP_GROUPINFO("FILTER_RANGE", 16, AP_Baro, _filtrer_range, HAL_BARO_FILTER_DEFAULT),
 
-
     AP_GROUPEND
 };
 

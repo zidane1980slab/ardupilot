@@ -316,6 +316,7 @@ void AP_Baro_ICM20789::convert_data(uint32_t Praw, uint32_t Traw)
             _sem->give();
         }
     }
+    }
 }
 
 void AP_Baro_ICM20789::timer(void)

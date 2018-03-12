@@ -78,6 +78,7 @@ bool AP_Baro_Backend::pressure_ok(float press) {
             printf("\nBaro pressure error: mean %f got %f\n", _mean_pressure, press );
             ret= false;
             k /= (d*10); // 2.5 and more, so one bad sample never change mean more than 4%
+            _error_count++;
         }
         _mean_pressure = _mean_pressure * (1-k) + press*k; // complimentary filter 1/k
     }
