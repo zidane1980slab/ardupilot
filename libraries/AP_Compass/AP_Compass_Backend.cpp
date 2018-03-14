@@ -159,7 +159,7 @@ bool AP_Compass_Backend::field_ok(float length) {
     if(is_zero(_mean_field_length)){ 
         _mean_field_length = length;
     } else {
-        float range = _compass.get_filtrer_range();
+        float range = _compass.get_filter_range();
         float d = abs(_mean_field_length-length)/(_mean_field_length+length);
         float k = FILTER_KOEF;
         if(!is_zero(range) && d*200 > range) { // check the difference from mean value outside allowed range

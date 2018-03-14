@@ -84,4 +84,4 @@
  #define MODE_GUIDED_NOGPS_ENABLED DISABLE
  
  
-#define DISABLE_STATS_UPDATE 1 // to reduce flash degradation
+#define STATS_ENABLED DISABLED // to reduce flash degradation
