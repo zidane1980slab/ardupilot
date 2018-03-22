@@ -439,9 +439,9 @@ const AP_Param::GroupInfo Compass::var_info[] = {
     AP_GROUPINFO("TYPEMASK", 33, Compass, _driver_type_mask, 0),
 
     // @Param: FLTR_RNG
-    // @DisplayName: Range in which sample can vary beeing good, in %
-    // @Description: Tunes bad sample filter, allowing to set range (0 - filter is off)
-    // @Units: percents
+    // @DisplayName: Range in which sample is accepted
+    // @Description: This sets the range around the average value that new samples must be within to be accepted. This can help reduce the impact of noise on sensors that are on long I2C cables. The value is a percentage from the average value. A value of zero disables this filter.
+    // @Units: %
     // @Range: 0 100
     // @Increment: 1
     AP_GROUPINFO("FLTR_RNG", 34, Compass, _filter_range, HAL_COMPASS_FILTER_DEFAULT),

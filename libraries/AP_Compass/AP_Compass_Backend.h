@@ -108,9 +108,9 @@ protected:
     // semaphore for access to shared frontend data
     AP_HAL::Semaphore *_sem;
 
-    //  Check that the baro valid by using a mean filter.
-    // If the value further that filtrer_range from mean value, it is rejected.
-    bool field_ok(float length);
+    // Check that the compass field is valid by using a mean filter on the vector length
+    bool field_ok(const Vector3f &field);
+    
     uint32_t get_error_count() const { return _error_count; }
 private:
     void apply_corrections(Vector3f &mag, uint8_t i);

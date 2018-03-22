@@ -146,28 +146,43 @@ void AP_Compass_Backend::set_rotation(uint8_t instance, enum Rotation rotation)
 }
 
 static constexpr float FILTER_KOEF = 0.1f;
-/* Check that the compass value is valid by using a mean filter. If the value is further than filtrer_range from mean value, it is rejected. */
-bool AP_Compass_Backend::field_ok(float length) {
-    if (isinf(length) || isnan(length)) {
+
+/* Check that the compass value is valid by using a mean filter. If
+ * the value is further than filtrer_range from mean value, it is
+ * rejected. 
+*/
+bool AP_Compass_Backend::field_ok(const Vector3f &field)
+{
+
+    
+    if (field.is_inf() || field.is_nan()) {
         return false;
     }
 
-    bool ret = true;
+    const float range = (float)_compass.get_filter_range();
+    if (range == 0) {
+        return true;
+    }
+
+    const float length = field.length();
+
     if (is_zero(_mean_field_length)) {
         _mean_field_length = length;
-    } else {
-        const float range = _compass.get_filter_range();
-        const float d = fabsf(_mean_field_length - length) / (_mean_field_length + length);  // diff divide by mean value in percent ( with the * 200.0f on later line)
-        float koeff = FILTER_KOEF;
-
-        if (!is_zero(range) && d * 200.0f > range) {  // check the difference from mean value outside allowed range
-            printf("\nCompass field length error: mean %f got %f\n", (double)_mean_field_length, (double)length );
-            ret = false;
-            koeff /= (d * 10.0f);  // 2.5 and more, so one bad sample never change mean more than 4%
-            _error_count++;
-        }
-        _mean_field_length = _mean_field_length * (1 - koeff) + length * koeff;  // complimentary filter 1/k
+        return true;
     }
+
+    bool ret = true;
+    const float d = fabsf(_mean_field_length - length) / (_mean_field_length + length);  // diff divide by mean value in percent ( with the *200.0f on later line)
+    float koeff = FILTER_KOEF;
+
+    if (d * 200.0f > range) {  // check the difference from mean value outside allowed range
+        // printf("\nCompass field length error: mean %f got %f\n", (double)_mean_field_length, (double)length );
+        ret = false;
+        koeff /= (d * 10.0f);  // 2.5 and more, so one bad sample never change mean more than 4%
+        _error_count++;
+    }
+    _mean_field_length = _mean_field_length * (1 - koeff) + length * koeff;  // complimentary filter 1/k
+
     return ret;
 }
 
