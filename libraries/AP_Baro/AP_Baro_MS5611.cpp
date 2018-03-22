@@ -309,7 +309,7 @@ void AP_Baro_MS56XX::_timer(void)
             _update_and_wrap_accumulator(&_accum.s_D2, adc_val,
                                          &_accum.d2_count, 32);
         } else {
-            if(pressure_ok(adc_val)) {
+            if (pressure_ok(adc_val)) {
                 _update_and_wrap_accumulator(&_accum.s_D1, adc_val,
                                              &_accum.d1_count, 128);
             }

@@ -192,11 +192,12 @@ void AP_Baro_BMP280::_update_pressure(int32_t press_raw)
 
 
     const float press = (float)p / 25600.0f;
-    if (pressure_ok(press)) {
-        if (_sem->take(HAL_SEMAPHORE_BLOCK_FOREVER)) {
-            _pressure = press;
-            _has_sample = true;
-            _sem->give();
-        }
+    if (!pressure_ok(press)) {
+        return;
+    }
+    if (_sem->take(HAL_SEMAPHORE_BLOCK_FOREVER)) {
+        _pressure = press;
+        _has_sample = true;
+        _sem->give();
     }
 }
